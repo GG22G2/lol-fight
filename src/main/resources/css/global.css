@@ -1,0 +1,240 @@
+/*.root{*/
+/*    -fx-base: blue;*/
+/*    -fx-background: red;*/
+/* */
+/*}*/
+
+.left-btn {
+    -fx-background-color: #282B3D;
+}
+
+.left-btn:hover {
+    -fx-background-color: #3E4257;
+}
+
+.left-btn:pressed {
+    -fx-background-color: #3E4257;
+}
+
+.left-btn:selected {
+    -fx-background-color: #3E4257;
+}
+
+.split-pane > .split-pane-divider {
+    -fx-padding: 0 0.2em 0 0.2em; /* 0 3 0 3 */
+    -fx-background-color: #1D2033
+}
+
+.split-pane {
+    -fx-padding: 0;
+}
+
+
+.split-pane:horizontal > .split-pane-divider:hover {
+    /*-fx-background-color: linear-gradient(blue,red,palegreen,plum)*/
+    -fx-background-color: linear-gradient(
+            to bottom,
+            #1D2033 0%,
+            #1D2033 45%,
+            #00CC74 45%,
+            #00CC74 55%,
+            #1D2033 55%,
+            #1D2033 100%
+    )
+}
+
+.split-pane:horizontal > .split-pane-divider:pressed {
+    -fx-background-color: #1D2033;
+}
+
+.title-bar {
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: gray;
+}
+
+.title-label {
+    -fx-font-family: "Source Han Sans CN";
+    -fx-font-size: 18px;
+}
+
+
+#svg-page .paste-svg-btn Region {
+    -fx-shape: "M26.4,5.2v3.3h-1.8l-2.3,0H7.7v21.3H4.4c-0.5,0-0.9-0.4-0.9-0.9V5.2c0-0.5,0.4-0.9,0.9-0.9h0.3h2.9h0h4.2V1.9  c0-1,0.8-1.9,1.8-1.9H16c1,0,1.8,0.8,1.8,1.9v2.4h4.4h3.3C26,4.3,26.4,4.7,26.4,5.2zM16,1.9C16,1.9,16,1.9,16,1.9l-2.3,0c0,0,0,0,0,0v2.4H16h0V1.9zM20.2,10.8h-9.4c-0.6,0-1,0.4-1,0.9v19.4c0,0.5,0.4,0.9,0.9,0.9h16.9c0.5,0,0.9-0.4,0.9-0.9V19.3h-8.3L20.2,10.8L20.2,10.8z";
+    -fx-pref-width: 16px;
+    -fx-pref-height: 16px;
+    -fx-max-width: 16px;
+    -fx-max-height: 16px;
+    -fx-min-width: 16px;
+    -fx-min-height: 16px;
+    -fx-background-color: #398fd0;
+}
+
+#svg-page .paste-svg-btn,
+#svg-page .open-svg-btn {
+    -fx-font-size: 13px;
+}
+
+/*.svg-btn {*/
+/*    -fx-pref-width: 18px;*/
+/*    -fx-pref-height: 18px;*/
+/*    -fx-max-width: 18px;*/
+/*    -fx-max-height: 18px;*/
+/*}*/
+
+.svg-btn Region {
+    -fx-pref-width: 10px;
+    -fx-pref-height: 10px;
+    -fx-max-width: 10px;
+    -fx-max-height: 10px;
+    -fx-background-color: #ffffff;
+}
+
+.svg-btn:hover {
+    -fx-background-color: #adadb6;
+}
+
+/*.svg-btn:hover Region {*/
+/*    -fx-background-color: #C9C9CE;*/
+/*}*/
+
+.svg-btn:pressed Region {
+    -fx-background-color: black;
+}
+
+
+#mini-btn Region {
+    -fx-max-height: 1px;
+    -fx-shape: "M31.2,17.7H0.8c-0.5,0-0.8-0.4-0.8-0.8v-1.8c0-0.5,0.4-0.8,0.8-0.8h30.3c0.5,0,0.8,0.4,0.8,0.8v1.8C32,17.4,31.6,17.7,31.2,17.7z";
+}
+
+#max-btn Region {
+    -fx-shape: "M768 170.666667H256c-46.933333 0-85.333333 38.4-85.333333 85.333333v512c0 46.933333 38.4 85.333333 85.333333 85.333333h512c46.933333 0 85.333333-38.4 85.333333-85.333333V256c0-46.933333-38.4-85.333333-85.333333-85.333333zM256 768V256h512v512H256z";
+}
+
+#close-btn Region {
+    /*-fx-background-color: gray;*/
+    -fx-shape: "M31.5,29.3L18.3,16.1L31.5,2.9c0.6-0.6,0.6-1.7,0-2.3c-0.6-0.6-1.7-0.6-2.3,0L16,13.8L2.8,0.5c-0.6-0.6-1.7-0.6-2.3,0  s-0.6,1.7,0,2.3l13.2,13.2L0.5,29.3c-0.6,0.6-0.6,1.7,0,2.3c0.6,0.6,1.7,0.6,2.3,0L16,18.4l13.2,13.2c0.6,0.6,1.7,0.6,2.3,0  C32.2,31,32.2,29.9,31.5,29.3L31.5,29.3z";
+}
+
+.host-item{
+    -fx-background-color: #282B3D;
+    -fx-background-radius: 6 6 6 6;
+}
+
+.host-item:hover{
+    -fx-background-color: #32364A;
+
+}
+
+.host-item:hover Region{
+    /*-fx-background-color: red;*/
+    -fx-background-color: #939292;
+}
+
+
+.more-opt {
+    -fx-background-radius: 10 10 10 10;
+}
+.more-opt:hover {
+    -fx-background-color: #3E4257;
+}
+.more-opt Region {
+    -fx-background-color: #282B3D;
+    /*-fx-background-color: #939292;*/
+    -fx-shape: "M746.662019 512c0 51.835575 42.044582 93.865831 93.865831 93.865831 51.851948 0 93.865831-42.029232 93.865831-93.865831 0-51.836599-42.013883-93.865831-93.865831-93.865831C788.706601 418.135192 746.662019 460.163401 746.662019 512z M89.604272 512c0 51.835575 42.043558 93.865831 93.864808 93.865831 51.822272 0 93.865831-42.029232 93.865831-93.865831 0-51.836599-42.043558-93.865831-93.865831-93.865831C131.648854 418.135192 89.604272 460.163401 89.604272 512z M418.132634 512c0 51.835575 42.013883 93.865831 93.866854 93.865831 51.821249 0 93.864808-42.029232 93.864808-93.865831 0-51.836599-42.043558-93.865831-93.864808-93.865831C460.146517 418.135192 418.132634 460.163401 418.132634 512z"
+}
+
+/*.more-opt Region{*/
+/*    -fx-max-height: 10px;*/
+/*    !*-fx-shape: "M31.5,29.3L18.3,16.1L31.5,2.9c0.6-0.6,0.6-1.7,0-2.3c-0.6-0.6-1.7-0.6-2.3,0L16,13.8L2.8,0.5c-0.6-0.6-1.7-0.6-2.3,0  s-0.6,1.7,0,2.3l13.2,13.2L0.5,29.3c-0.6,0.6-0.6,1.7,0,2.3c0.6,0.6,1.7,0.6,2.3,0L16,18.4l13.2,13.2c0.6,0.6,1.7,0.6,2.3,0  C32.2,31,32.2,29.9,31.5,29.3L31.5,29.3z";*!*/
+/*    -fx-shape: "M746.662019 512c0 51.835575 42.044582 93.865831 93.865831 93.865831 51.851948 0 93.865831-42.029232 93.865831-93.865831 0-51.836599-42.013883-93.865831-93.865831-93.865831C788.706601 418.135192 746.662019 460.163401 746.662019 512z M89.604272 512c0 51.835575 42.043558 93.865831 93.864808 93.865831 51.822272 0 93.865831-42.029232 93.865831-93.865831 0-51.836599-42.043558-93.865831-93.865831-93.865831C131.648854 418.135192 89.604272 460.163401 89.604272 512z M418.132634 512c0 51.835575 42.013883 93.865831 93.866854 93.865831 51.821249 0 93.864808-42.029232 93.864808-93.865831 0-51.836599-42.043558-93.865831-93.864808-93.865831C460.146517 418.135192 418.132634 460.163401 418.132634 512z"*/
+/*}*/
+
+
+
+.toggle-button {
+    -fx-background-radius: 0 0 0 0;
+}
+
+/*.segmented-button.dark .toggle-button.left-pill {*/
+/*    -fx-background-radius: 3 0 0 3;*/
+/*    -fx-background-insets: 0 0 -1 0, 0, 1 0 1 1, 2 0 2 2;*/
+/*}*/
+
+
+.add-host-btn {
+    -fx-background-color: #3E4257;
+    -fx-background-radius: 15 15 15 15;
+    -fx-padding: 5 20 5 20;
+    /*-fx-font-size: 60;*/
+    -fx-font-weight: 800;
+}
+
+.add-host-btn:hover {
+    -fx-text-fill: #00CC73;
+    -fx-color: #00CC73;
+    -fx-base: #00CC73;
+}
+
+.add-host-btn:pressed {
+    -fx-text-fill: #00CC73;
+    -fx-color: #00CC73;
+    -fx-base: #00CC73;
+}
+
+.add-host-btn:selected {
+    -fx-text-fill: #00CC73;
+    -fx-color: #00CC73;
+    -fx-base: #00CC73;
+}
+
+.button:default {
+    -fx-text-fill: #00CC73;
+    -fx-color: #00CC73;
+    -fx-base: #00CC73;
+}
+
+
+
+.tab-pane {
+    -fx-open-tab-animation: NONE;
+    -fx-close-tab-animation: NONE;
+    -fx-background-radius: 0 0 0 0;
+    -fx-border-width: 0 0 0 0;
+    -fx-background-insets: 0, 0;
+    -fx-padding: 0;
+    -fx-end-margin: 0;
+}
+
+
+.tab-pane.floating {
+    -fx-background-insets: 0, 0;
+    -fx-background-radius: 0 0 0 0;
+    -fx-border-width: 0 0 0 0;
+    -fx-padding: 0;
+    -fx-end-margin: 0;
+}
+
+
+.tab-pane.floating > .tab-content-area {
+    -fx-background-insets: 0 , 0;
+    /*-fx-background-radius: 0 0 0 0;*/
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-end-margin: 0;
+}
+
+
+
+.tab-header-area{
+    -fx-background-color: red;
+    -fx-max-height: 0px;
+    -fx-pref-height: 0px;
+}
+
+.tab-header-area .headers-region{
+    -fx-max-height: 0px;
+    -fx-max-width: 0px;
+    -fx-pref-width: 0px;
+    -fx-pref-height: 0px;
+}

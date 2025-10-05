@@ -1,0 +1,102 @@
+[
+  8,
+  "OnJsonApiEvent_lol-champ-select_v1_session",
+  {
+    "data": {
+      "actions": [
+        [
+          {
+            "actorCellId": 0,
+            "championId": 0,
+            "completed": false,
+            "duration": 0,
+            "id": 0,
+            "isAllyAction": true,
+            "isInProgress": true,
+            "pickTurn": 0,
+            "type": "pick"
+          }
+        ]
+      ],
+      "allowBattleBoost": false,
+      "allowDuplicatePicks": false,
+      "allowLockedEvents": false,
+      "allowPlayerPickSameChampion": false,
+      "allowRerolling": false,
+      "allowSkinSelection": true,
+      "allowSubsetChampionPicks": false,
+      "bans": {
+        "myTeamBans": [],
+        "numBans": 0,
+        "theirTeamBans": []
+      },
+      "benchChampions": [],
+      "benchEnabled": false,
+      "boostableSkinCount": 0,
+      "chatDetails": {
+        "mucJwtDto": {
+          "channelClaim": "b8a51361-e30d-4322-8cd7-e3edfcdc8f4f",
+          "domain": "lol-champ-select",
+          "jwt": "eyJraWQiOiIxIiwiYWxnIjoiUlMyNTYifQ.eyJ0Z3QiOiJwbGFjZWhvbGRlciIsInN1YiI6ImIwMzE5YTRiLTg1YTktNTdjOC1hNDE0LTNiNWMyODY4NWE1OCIsIm1ldGFkYXRhIjp7ImdhbWVJZCI6IjQwMDY1ODYwMTk2NyIsInJlZ2lvbiI6IlRKMTAxIiwibG9iYnlUeXBlIjoicHJlLWdhbWUiLCJwcm9kdWN0IjoibG9sIn0sImlzcyI6ImxvbC10ZWFtYnVpbGRlciIsImNobiI6ImI4YTUxMzYxLWUzMGQtNDMyMi04Y2Q3LWUzZWRmY2RjOGY0ZiIsInR5cCI6ImxvbC1jaGFtcC1zZWxlY3QiLCJleHAiOjE3NTk2Mzc5NjMsImlhdCI6MTc1OTYzNzM2MywianRpIjoiODA5MDZmNDUtNjcwNi00YWZiLWJkYmQtNzBjOWRlODE0MGMzIiwiY3JtIjoiYjhhNTEzNjEtZTMwZC00MzIyLThjZDctZTNlZGZjZGM4ZjRmQGxvbC1jaGFtcC1zZWxlY3QucHZwLm5ldCJ9.FmQMAGLr0qmHTzY_9N35mA7yfRw2S65bDheIjIy4vTAjie75iQX5_Y2EiIHh44iaXYPs8UanY5vTllJikVQMH-P8gyqDrIjjMjoMkzbwr4QB5OV_0OsqxuP2wDHoZ1RSxZMeay332T1aDf4ZychclckjJO-Oc_576rQbb3P-Nmv6oKSXNyNO3g9KEpZtXgRw5gjXpVlo7_dvfDnjm_ZpawJExUIckbx7L7BHNpEWXK-9eKf18KMCtyL1zsOW_rRuoFeLa10NYXGb5g-qf8-YwClwwc5FrESrdoNNsVMUH10Qp-Ukw9NfZgzfENOVyWEu-C-EFFu7HeSQ3jTSek9P7w",
+          "targetRegion": "placeholder"
+        },
+        "multiUserChatId": "b8a51361-e30d-4322-8cd7-e3edfcdc8f4f",
+        "multiUserChatPassword": "eyJraWQiOiIxIiwiYWxnIjoiUlMyNTYifQ.eyJ0Z3QiOiJwbGFjZWhvbGRlciIsInN1YiI6ImIwMzE5YTRiLTg1YTktNTdjOC1hNDE0LTNiNWMyODY4NWE1OCIsIm1ldGFkYXRhIjp7ImdhbWVJZCI6IjQwMDY1ODYwMTk2NyIsInJlZ2lvbiI6IlRKMTAxIiwibG9iYnlUeXBlIjoicHJlLWdhbWUiLCJwcm9kdWN0IjoibG9sIn0sImlzcyI6ImxvbC10ZWFtYnVpbGRlciIsImNobiI6ImI4YTUxMzYxLWUzMGQtNDMyMi04Y2Q3LWUzZWRmY2RjOGY0ZiIsInR5cCI6ImxvbC1jaGFtcC1zZWxlY3QiLCJleHAiOjE3NTk2Mzc5NjMsImlhdCI6MTc1OTYzNzM2MywianRpIjoiODA5MDZmNDUtNjcwNi00YWZiLWJkYmQtNzBjOWRlODE0MGMzIiwiY3JtIjoiYjhhNTEzNjEtZTMwZC00MzIyLThjZDctZTNlZGZjZGM4ZjRmQGxvbC1jaGFtcC1zZWxlY3QucHZwLm5ldCJ9.FmQMAGLr0qmHTzY_9N35mA7yfRw2S65bDheIjIy4vTAjie75iQX5_Y2EiIHh44iaXYPs8UanY5vTllJikVQMH-P8gyqDrIjjMjoMkzbwr4QB5OV_0OsqxuP2wDHoZ1RSxZMeay332T1aDf4ZychclckjJO-Oc_576rQbb3P-Nmv6oKSXNyNO3g9KEpZtXgRw5gjXpVlo7_dvfDnjm_ZpawJExUIckbx7L7BHNpEWXK-9eKf18KMCtyL1zsOW_rRuoFeLa10NYXGb5g-qf8-YwClwwc5FrESrdoNNsVMUH10Qp-Ukw9NfZgzfENOVyWEu-C-EFFu7HeSQ3jTSek9P7w"
+      },
+      "counter": 2,
+      "disallowBanningTeammateHoveredChampions": false,
+      "gameId": 400658601967,
+      "hasSimultaneousBans": true,
+      "hasSimultaneousPicks": true,
+      "id": "b8a51361-e30d-4322-8cd7-e3edfcdc8f4f",
+      "isCustomGame": true,
+      "isLegacyChampSelect": false,
+      "isSpectating": false,
+      "localPlayerCellId": 0,
+      "lockedEventIndex": -1,
+      "myTeam": [
+        {
+          "assignedPosition": "",
+          "cellId": 0,
+          "championId": 0,
+          "championPickIntent": 0,
+          "gameName": "gg22g2",
+          "internalName": "",
+          "isHumanoid": false,
+          "nameVisibilityType": "VISIBLE",
+          "obfuscatedPuuid": "",
+          "obfuscatedSummonerId": 0,
+          "pickMode": 0,
+          "pickTurn": 0,
+          "playerAlias": "",
+          "playerType": "",
+          "puuid": "b0319a4b-85a9-57c8-a414-3b5c28685a58",
+          "selectedSkinId": 0,
+          "spell1Id": 6,
+          "spell2Id": 7,
+          "summonerId": 16195836083,
+          "tagLine": "43680",
+          "team": 2,
+          "wardSkinId": -1
+        }
+      ],
+      "pickOrderSwaps": [],
+      "positionSwaps": [],
+      "queueId": 3200,
+      "rerollsRemaining": 0,
+      "showQuitButton": true,
+      "skipChampionSelect": false,
+      "theirTeam": [],
+      "timer": {
+        "adjustedTimeLeftInPhase": 90000,
+        "internalNowInEpochMs": 1759637366463,
+        "isInfinite": false,
+        "phase": "BAN_PICK",
+        "totalTimeInPhase": 90000
+      },
+      "trades": []
+    },
+    "eventType": "Create",
+    "uri": "/lol-champ-select/v1/session"
+  }
+]
