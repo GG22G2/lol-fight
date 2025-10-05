@@ -1,7 +1,7 @@
 package hsb.lol.lolfight.demo;
 
 /**
- * @author 胡帅博
+ * @author hsb
  * @date 2023/9/5 11:35
  */
 

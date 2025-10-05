@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * @author 胡帅博
+ * @author hsb
  * @date 2023/3/21 13:02
  */
 public class ConnectClient {

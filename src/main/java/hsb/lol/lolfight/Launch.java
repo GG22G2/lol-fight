@@ -1,7 +1,7 @@
 package hsb.lol.lolfight;
 
 /**
- * @author 胡帅博
+ * @author hsb
  * @date 2023/8/27 11:52
  */
 public class Launch {

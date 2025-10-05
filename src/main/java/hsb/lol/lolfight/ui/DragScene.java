@@ -8,7 +8,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 /**
- * @author 胡帅博
+ * @author hsb
  * @date 2023/1/29 20:13
  */
 public class DragScene extends Scene {

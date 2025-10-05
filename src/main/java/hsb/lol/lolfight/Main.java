@@ -1,9 +1,7 @@
 package hsb.lol.lolfight;
 
 import hsb.lol.lolfight.config.Config;
-import hsb.lol.lolfight.data.Summoner;
 import hsb.lol.lolfight.lcu.websocket.ConnectClient;
-import hsb.lol.lolfight.lcu.websocket.LolWssConnect;
 import hsb.lol.lolfight.ui.DragScene;
 import hsb.lol.lolfight.ui.RootPanel;
 import javafx.application.Application;
@@ -11,7 +9,7 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.PerspectiveCamera;
-import javafx.scene.Scene;
+
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
@@ -19,6 +17,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+
 
 
 public class Main extends Application {
@@ -46,7 +46,9 @@ public class Main extends Application {
 
         CheckBox autoAcceptCheck = new CheckBox("自动接受对局");
         autoAcceptCheck.setTextFill(Paint.valueOf("#ffffff"));
-        autoAcceptCheck.selectedProperty().addListener((observable, oldValue, newValue) -> Config.autoAccept = newValue);
+        autoAcceptCheck.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            Config.autoAccept = newValue;
+        });
         autoAcceptRow.getChildren().add(autoAcceptCheck);
 
 
@@ -54,7 +56,10 @@ public class Main extends Application {
         HBox autoPickRow = new HBox();
         autoPickRow.setPadding(new Insets(10, 0, 10, 0));
         CheckBox autoPickCheck = new CheckBox("秒抢英雄");
+        autoPickCheck.selectedProperty().addListener((observable, oldValue, newValue) -> Config.autoPick = newValue);
         autoPickCheck.setTextFill(Paint.valueOf("#ffffff"));
+
+
 
         Label configChampionBtn = new Label("配置");
         configChampionBtn.setTextFill(Paint.valueOf("#ffffff"));
@@ -98,9 +103,9 @@ public class Main extends Application {
         new ConnectClient(System.out::println).connect();
 
         //初始勾选
-        autoAcceptCheck.selectedProperty().setValue(true);
-        autoPickCheck.selectedProperty().setValue(true);
-        openHelpCheck.selectedProperty().setValue(true);
+        autoAcceptCheck.setSelected(Config.autoAccept);
+        autoPickCheck.setSelected(Config.autoPick);
+        openHelpCheck.setSelected(Config.openHelp);
 
     }
 

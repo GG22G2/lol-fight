@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static hsb.lol.lolfight.lcu.websocket.LolWssConnect.logger;
+
 public class DataService {
 
     //获取全部英雄
@@ -35,6 +37,7 @@ public class DataService {
             Summoner.heroIdMap.put(championId, championName);
             Summoner.heroNameMap.put(championName, championId);
             //System.out.println(championName);
+            logger.println("英雄：" + championName);
         }
         Summoner.allChampions = Summoner.heroNameMap;
     }
@@ -58,12 +61,15 @@ public class DataService {
         Matcher idMatcher = idPattern.matcher(s);
 
         while (nameMatcher.find() && titleMatcher.find() && idMatcher.find()) {
-            map.put(nameMatcher.group() + " - " + titleMatcher.group(), Integer.parseInt(idMatcher.group()));
+          //  map.put(nameMatcher.group() + " - " + titleMatcher.group(), Integer.parseInt(idMatcher.group()));
+            map.put(nameMatcher.group(), Integer.parseInt(idMatcher.group()));
         }
 
         Summoner.ownedChampions = map;
-
     }
+
+
+
 
     //获取召唤师头像和id
     public static void freshSummoner() {
@@ -93,13 +99,16 @@ public class DataService {
     //转换输入流为 String
     //方便进行正则表达式匹配
     public static String convertStr(InputStream inputStream) {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        BufferedReader reader = new BufferedReader(inputStreamReader);
-
         StringBuilder result = new StringBuilder();
-        try {
-            while (reader.read() != -1)
-                result.append(reader.readLine()).append("\n");
+        // 使用 try-with-resources 语句确保流被自动关闭
+        try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             BufferedReader reader = new BufferedReader(inputStreamReader)) {
+
+            String line;
+            // 正确的行读取方式
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

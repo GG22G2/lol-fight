@@ -6,7 +6,7 @@
 
     <groupId>hsb.lol</groupId>
     <artifactId>lol-fight</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>lol-fight</name>
 
     <properties>
@@ -102,15 +102,22 @@
                         <arg>--no-fallback</arg>
                         <arg>--enable-http</arg>
                         <arg>--enable-https</arg>
+                        <arg>-H:+AddAllCharsets</arg>
                         <arg>-dsa</arg>
 <!--                        <arg>-H:DashboardDump=lol-fight</arg>-->
 <!--                        <arg>-H:+DashboardAll</arg>-->
                     </nativeImageArgs>
+                    <linkerArgs>
+                        <arg>-Wl,--subsystem,console</arg>
+                    </linkerArgs>
                     <reflectionList>
                         <list>java.net.AbstractPlainSocketImpl</list>
                     </reflectionList>
                     <graalvmHome>G:\kaifa_environment\jdk\graalvm-java23-windows-amd64-gluon-23+25.1-dev</graalvmHome>
                     <enableSWRendering>false</enableSWRendering>
+                    <runtimeArgs>
+                        <arg>-Dfile.encoding=utf8</arg>
+                    </runtimeArgs>
                 </configuration>
             </plugin>
         </plugins>

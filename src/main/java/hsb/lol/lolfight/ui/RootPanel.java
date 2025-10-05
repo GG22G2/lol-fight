@@ -8,7 +8,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 /**
- * @author 胡帅博
+ * @author hsb
  * @date 2023/8/27 0:53
  */
 public class RootPanel extends BorderPane {

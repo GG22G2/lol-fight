@@ -18,7 +18,12 @@ public class ApiRequest {
     //接受对局
     public void autoAccept() {
         String url = Connect.getConnect().getAddress() + "/lol-matchmaking/v1/ready-check/accept";
-        request(url, "POST");
+
+        try(InputStream post =        request(url, "POST")) {
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -26,7 +31,12 @@ public class ApiRequest {
     //交换英雄
     public void benchSwap(int championId) {
         String url = Connect.getConnect().getAddress() + "/lol-champ-select/v1/session/bench/swap/" + championId;
-        request(url, "POST");
+        try(InputStream post = request(url, "POST")) {
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -58,6 +68,8 @@ public class ApiRequest {
         String url = Connect.getConnect().getAddress() + "/lol-champions/v1/owned-champions-minimal";
         return request(url, "GET");
     }
+
+
 
     //Api: /lol-summoner/v1/current-summoner
     //获取当前召唤师的详细信息
