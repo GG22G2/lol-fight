@@ -3,6 +3,7 @@ package hsb.lol.lolfight;
 import hsb.lol.lolfight.config.Config;
 import hsb.lol.lolfight.lcu.websocket.ConnectClient;
 import hsb.lol.lolfight.ui.DragScene;
+import hsb.lol.lolfight.ui.HeroPriorityConfigWindow;
 import hsb.lol.lolfight.ui.RootPanel;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -67,7 +68,8 @@ public class Main extends Application {
         configChampionBtn.setPadding(new Insets(3, 5, 3, 5));
         configChampionBtn.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));
         configChampionBtn.setOnMouseClicked(event -> {
-
+            // 当点击“配置”时，调用显示配置窗口的方法
+            HeroPriorityConfigWindow.display();
         });
 
         autoPickRow.setAlignment(Pos.CENTER_LEFT);
