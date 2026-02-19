@@ -6,6 +6,7 @@ import hsb.lol.lolfight.json.JSONArray;
 import hsb.lol.lolfight.json.JSONObject;
 import hsb.lol.lolfight.json.JSONTokener;
 import hsb.lol.lolfight.lcu.ApiRequest;
+import hsb.lol.lolfight.log.LogHelper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,8 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static hsb.lol.lolfight.lcu.websocket.LolWssConnect.logger;
 
 public class DataService {
 
@@ -37,7 +36,7 @@ public class DataService {
             Summoner.heroIdMap.put(championId, championName);
             Summoner.heroNameMap.put(championName, championId);
             //System.out.println(championName);
-            logger.println("英雄：" + championName);
+            LogHelper.log("英雄：" + championName);
         }
         Summoner.allChampions = Summoner.heroNameMap;
     }
