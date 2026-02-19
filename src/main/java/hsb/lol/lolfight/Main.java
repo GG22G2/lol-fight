@@ -25,6 +25,8 @@ import javafx.stage.StageStyle;
 public class Main extends Application {
     @Override
     public void start(Stage stage) {
+        // 启动时加载配置
+        Config.load();
 
         RootPanel rootPanel = new RootPanel(stage);
 
@@ -49,6 +51,7 @@ public class Main extends Application {
         autoAcceptCheck.setTextFill(Paint.valueOf("#ffffff"));
         autoAcceptCheck.selectedProperty().addListener((observable, oldValue, newValue) -> {
             Config.autoAccept = newValue;
+            Config.save();
         });
         autoAcceptRow.getChildren().add(autoAcceptCheck);
 
@@ -57,7 +60,10 @@ public class Main extends Application {
         HBox autoPickRow = new HBox();
         autoPickRow.setPadding(new Insets(10, 0, 10, 0));
         CheckBox autoPickCheck = new CheckBox("秒抢英雄");
-        autoPickCheck.selectedProperty().addListener((observable, oldValue, newValue) -> Config.autoPick = newValue);
+        autoPickCheck.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            Config.autoPick = newValue;
+            Config.save();
+        });
         autoPickCheck.setTextFill(Paint.valueOf("#ffffff"));
 
 
@@ -82,7 +88,10 @@ public class Main extends Application {
         autoPickRow.setPadding(new Insets(10, 0, 10, 0));
         CheckBox openHelpCheck = new CheckBox("打开英雄攻略");
         openHelpCheck.setTextFill(Paint.valueOf("#ffffff"));
-        openHelpCheck.selectedProperty().addListener((observable, oldValue, newValue) -> Config.openHelp = newValue);
+        openHelpCheck.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            Config.openHelp = newValue;
+            Config.save();
+        });
         openHelpRow.getChildren().addAll(openHelpCheck);
 
 

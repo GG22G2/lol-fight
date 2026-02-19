@@ -7,4 +7,6 @@ module hsb.lol.lolfight {
 
     exports hsb.lol.lolfight;
     exports hsb.lol.lolfight.demo;
+    exports hsb.lol.lolfight.config;
+    exports hsb.lol.lolfight.json;
 }

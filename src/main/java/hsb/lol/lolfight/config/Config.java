@@ -1,5 +1,11 @@
 package hsb.lol.lolfight.config;
 
+import hsb.lol.lolfight.json.JSONArray;
+import hsb.lol.lolfight.json.JSONObject;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +31,63 @@ public class Config {
             ,"愁云使者"
     ));
 
+    /**
+     * 从 config.json 加载配置
+     * 如果文件不存在或读取失败，则保持默认值
+     */
+    public static void load() {
+        Path configPath = PathUtil.getDefaultConfigFilePath();
+        if (!Files.exists(configPath)) {
+            return;
+        }
 
+        try {
+            String content = Files.readString(configPath);
+            JSONObject json = new JSONObject(content);
+
+            // 读取 boolean 配置
+            autoAccept = json.optBoolean("autoAccept", autoAccept);
+            autoPick = json.optBoolean("autoPick", autoPick);
+            openHelp = json.optBoolean("openHelp", openHelp);
+
+            // 读取英雄列表
+            JSONArray heroArray = json.optJSONArray("heroNames");
+            if (heroArray != null) {
+                List<String> loadedHeroes = new ArrayList<>();
+                for (int i = 0; i < heroArray.length(); i++) {
+                    loadedHeroes.add(heroArray.getString(i));
+                }
+                if (!loadedHeroes.isEmpty()) {
+                    heroNames = loadedHeroes;
+                }
+            }
+        } catch (Exception e) {
+            // 加载失败时使用默认值，不抛出异常
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 将当前配置保存到 config.json
+     */
+    public static void save() {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("autoAccept", autoAccept);
+            json.put("autoPick", autoPick);
+            json.put("openHelp", openHelp);
+
+            JSONArray heroArray = new JSONArray();
+            for (String hero : heroNames) {
+                heroArray.put(hero);
+            }
+            json.put("heroNames", heroArray);
+
+            Path configPath = PathUtil.getDefaultConfigFilePath();
+            Files.writeString(configPath, json.toString(2));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

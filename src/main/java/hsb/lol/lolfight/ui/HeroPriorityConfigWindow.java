@@ -324,7 +324,7 @@ public class HeroPriorityConfigWindow {
             }
         });
 
-        saveButton.setOnAction(e -> { Config.heroNames = new ArrayList<>(priorityHeroes); window.close(); });
+        saveButton.setOnAction(e -> { Config.heroNames = new ArrayList<>(priorityHeroes); Config.save(); window.close(); });
         cancelButton.setOnAction(e -> window.close());
 
         // Window Dragging
