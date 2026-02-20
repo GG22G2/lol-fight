@@ -336,6 +336,7 @@ public class HeroPriorityConfigWindow {
         // 创建优先级面板容器
         priorityStack = new StackPane();
         priorityStack.setAlignment(Pos.TOP_LEFT);
+        priorityStack.setPadding(new Insets(0, 0, 0, 6));
 
         priorityFlowPane = new FlowPane();
         priorityFlowPane.setHgap(CARD_GAP);
@@ -921,22 +922,22 @@ public class HeroPriorityConfigWindow {
         List<javafx.scene.Node> children = priorityFlowPane.getChildren();
         int size = children.size();
 
+        Bounds flowPaneBounds = priorityFlowPane.getBoundsInParent();
+        double flowPaneX = flowPaneBounds.getMinX();
+
         if (size == 0 || index == 0) {
-            // 插入到最前面
-            insertLine.setLayoutX(-2);
-            insertLine.setLayoutY(6);
+            insertLine.setLayoutX(flowPaneX + 4 - CARD_GAP / 2 - 2);
+            insertLine.setLayoutY(flowPaneBounds.getMinY() + 4);
             insertLine.setHeight(100);
         } else if (index >= size) {
-            // 插入到最后面
             Bounds lastBounds = children.get(size - 1).getBoundsInParent();
-            insertLine.setLayoutX(lastBounds.getMaxX() + CARD_GAP / 2 - 2);
-            insertLine.setLayoutY(lastBounds.getMinY());
+            insertLine.setLayoutX(flowPaneX + lastBounds.getMaxX() + CARD_GAP / 2 - 2);
+            insertLine.setLayoutY(flowPaneBounds.getMinY() + lastBounds.getMinY());
             insertLine.setHeight(lastBounds.getHeight());
         } else {
-            // 插入到中间
             Bounds targetBounds = children.get(index).getBoundsInParent();
-            insertLine.setLayoutX(targetBounds.getMinX() - CARD_GAP / 2 - 2);
-            insertLine.setLayoutY(targetBounds.getMinY());
+            insertLine.setLayoutX(flowPaneX + targetBounds.getMinX() - CARD_GAP / 2 - 2);
+            insertLine.setLayoutY(flowPaneBounds.getMinY() + targetBounds.getMinY());
             insertLine.setHeight(targetBounds.getHeight());
         }
 
