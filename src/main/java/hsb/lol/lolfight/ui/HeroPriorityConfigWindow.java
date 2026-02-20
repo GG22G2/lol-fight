@@ -795,14 +795,10 @@ public class HeroPriorityConfigWindow {
      * 4. 重置所有状态变量
      */
     private static void finishDragMode() {
-        // 执行重排序
         if (draggedHeroName != null && insertIndex >= 0) {
             int draggedIndex = priorityHeroes.indexOf(draggedHeroName);
             if (draggedIndex != -1) {
                 int targetIdx = insertIndex;
-                if (draggedIndex < targetIdx) {
-                    targetIdx--;
-                }
                 if (draggedIndex != targetIdx && targetIdx >= 0 && targetIdx <= priorityHeroes.size()) {
                     System.out.println("[拖拽完成] 重排序 - 从 " + draggedIndex + " 移动到 " + targetIdx);
                     priorityHeroes.remove(draggedIndex);
@@ -872,24 +868,17 @@ public class HeroPriorityConfigWindow {
             return 0;
         }
 
-        // 遍历所有卡片，判断鼠标在哪个卡片的范围内
         for (int i = 0; i < size; i++) {
             javafx.scene.Node node = children.get(i);
             Bounds bounds = node.getBoundsInParent();
 
-            // 检查鼠标是否在这一行
             if (flowY >= bounds.getMinY() && flowY <= bounds.getMaxY()) {
-                // 检查鼠标在卡片的左半部分还是右半部分
-                if (mouseX <= bounds.getMinX() + bounds.getWidth() / 2) {
-                    return i;       // 左半部分：插入到该卡片前面
-                }
-                if (mouseX <= bounds.getMaxX()) {
-                    return i + 1;   // 右半部分：插入到该卡片后面
+                if (mouseX >= bounds.getMinX() && mouseX <= bounds.getMaxX()) {
+                    return i;
                 }
             }
         }
 
-        // 检查是否在最后一行下方
         Bounds lastBounds = children.get(size - 1).getBoundsInParent();
         if (flowY > lastBounds.getMaxY()) {
             return size;
