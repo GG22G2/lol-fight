@@ -799,10 +799,15 @@ public class HeroPriorityConfigWindow {
             int draggedIndex = priorityHeroes.indexOf(draggedHeroName);
             if (draggedIndex != -1) {
                 int targetIdx = insertIndex;
-                if (draggedIndex != targetIdx && targetIdx >= 0 && targetIdx <= priorityHeroes.size()) {
+                if (draggedIndex != targetIdx && targetIdx >= 0 && targetIdx < priorityHeroes.size()) {
                     System.out.println("[拖拽完成] 重排序 - 从 " + draggedIndex + " 移动到 " + targetIdx);
                     priorityHeroes.remove(draggedIndex);
                     priorityHeroes.add(targetIdx, draggedHeroName);
+                    refreshPriorityFlowPane();
+                } else if (targetIdx == priorityHeroes.size()) {
+                    System.out.println("[拖拽完成] 重排序 - 从 " + draggedIndex + " 移动到末尾");
+                    priorityHeroes.remove(draggedIndex);
+                    priorityHeroes.add(draggedHeroName);
                     refreshPriorityFlowPane();
                 } else {
                     System.out.println("[拖拽完成] 位置未变化 - draggedIndex: " + draggedIndex + ", targetIdx: " + targetIdx);
