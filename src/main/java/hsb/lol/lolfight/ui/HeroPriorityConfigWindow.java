@@ -227,11 +227,11 @@ public class HeroPriorityConfigWindow {
 
     // ==================== 常量定义 ====================
     
-    private static final int HERO_CARD_SIZE = 85;       // 英雄卡片宽度
-    private static final int AVATAR_SIZE = 55;          // 头像尺寸
-    private static final int CARD_GAP = 8;              // 卡片间距
-    private static final double DRAG_THRESHOLD = 10.0;  // 拖拽判定阈值（像素）
-    private static final double DRAG_DELAY_MS = 300;    // 长按进入拖拽模式的延迟（毫秒）
+    private static final int HERO_CARD_SIZE = 85;
+    private static final int AVATAR_SIZE = 55;
+    private static final int CARD_GAP = 8;
+    private static final double DRAG_DISTANCE_THRESHOLD = 15.0;
+    private static final double DRAG_DELAY_MS = 300;
 
     // ==================== UI 组件引用 ====================
     
@@ -637,14 +637,29 @@ public class HeroPriorityConfigWindow {
         });
 
         rightScrollPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
-            if (!isDragging) return;
+            if (isDragging) {
+                double mouseX = event.getX();
+                double mouseY = event.getY();
 
-            double mouseX = event.getX();
-            double mouseY = event.getY();
+                updateDragPreviewPosition(mouseX, mouseY);
+                updateInsertPosition(mouseX, mouseY);
+                handleAutoScroll(mouseY);
+                return;
+            }
 
-            updateDragPreviewPosition(mouseX, mouseY);
-            updateInsertPosition(mouseX, mouseY);
-            handleAutoScroll(mouseY);
+            if (dragTimer != null && draggedCard != null) {
+                double dx = event.getX() - pressX;
+                double dy = event.getY() - pressY;
+                double distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance > DRAG_DISTANCE_THRESHOLD) {
+                    dragTimer.stop();
+                    dragTimer = null;
+                    System.out.println("[右侧ScrollPane] 移动距离超过阈值 - 进入拖拽模式");
+                    timerTriggered = true;
+                    startDragMode(draggedCard, draggedHeroName, event);
+                }
+            }
         });
 
         rightScrollPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
