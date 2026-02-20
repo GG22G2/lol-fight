@@ -47,63 +47,59 @@ public class HeroPriorityConfigWindow {
     
     private static final String CSS_STYLE = """
         .root {
-            -fx-background-color: #0F172A;
-            -fx-background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%234FA6FD' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            -fx-background-color: #1D2033;
             -fx-font-family: 'Segoe UI', 'Microsoft YaHei UI', system-ui, sans-serif;
-            -fx-border-color: rgba(79, 166, 253, 0.3);
+            -fx-border-color: #3E4257;
             -fx-border-width: 1px;
-            -fx-border-radius: 12px;
-            -fx-background-radius: 12px;
+            -fx-border-radius: 10px;
+            -fx-background-radius: 10px;
         }
 
         .window-title {
-            -fx-font-size: 20px;
+            -fx-font-size: 18px;
             -fx-font-weight: 600;
-            -fx-text-fill: linear-gradient(to bottom, #4FA6FD, #2563EB);
-            -fx-effect: dropshadow(gaussian, rgba(79, 166, 253, 0.4), 15, 0, 0, 0);
+            -fx-text-fill: #FFFFFF;
         }
 
         .title-underline {
-            -fx-min-height: 2px;
-            -fx-max-height: 2px;
-            -fx-background-color: linear-gradient(to right, transparent, #4FA6FD, transparent);
-            -fx-opacity: 0.8;
+            -fx-min-height: 1px;
+            -fx-max-height: 1px;
+            -fx-background-color: #3E4257;
+            -fx-opacity: 0.5;
             -fx-max-width: 240px;
         }
 
         .column-header {
             -fx-font-size: 14px;
             -fx-font-weight: 500;
-            -fx-text-fill: #94A3B8;
+            -fx-text-fill: #939292;
             -fx-padding: 6px 0 10px 0;
         }
 
         .panel {
-            -fx-background-color: #1E293B;
-            -fx-background-radius: 10px;
-            -fx-border-radius: 10px;
-            -fx-border-color: rgba(79, 166, 253, 0.2);
-            -fx-border-width: 1px;
+            -fx-background-color: #282B3D;
+            -fx-background-radius: 6px;
+            -fx-border-radius: 6px;
+            -fx-border-color: transparent;
+            -fx-border-width: 0;
             -fx-padding: 14px;
-            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 12, 0, 0, 3);
         }
 
         .text-field {
-            -fx-background-color: #2D3748;
-            -fx-text-fill: #F1F5F9;
-            -fx-prompt-text-fill: #64748B;
-            -fx-border-color: #334155;
+            -fx-background-color: #1D2033;
+            -fx-text-fill: #FFFFFF;
+            -fx-prompt-text-fill: #939292;
+            -fx-border-color: #3E4257;
             -fx-border-width: 1px;
             -fx-border-radius: 6px;
             -fx-background-radius: 6px;
             -fx-font-size: 13px;
             -fx-padding: 8px 12px;
-            -fx-highlight-fill: rgba(79, 166, 253, 0.4);
+            -fx-highlight-fill: #00CC74;
             -fx-cursor: text;
         }
         .text-field:focused {
-            -fx-border-color: #4FA6FD;
-            -fx-effect: dropshadow(gaussian, rgba(79, 166, 253, 0.2), 6, 0, 0, 0);
+            -fx-border-color: #00CC74;
         }
 
         .hero-grid {
@@ -112,36 +108,35 @@ public class HeroPriorityConfigWindow {
         }
 
         .hero-card {
-            -fx-background-color: #121826;
-            -fx-background-radius: 8px;
-            -fx-border-radius: 8px;
+            -fx-background-color: #1D2033;
+            -fx-background-radius: 6px;
+            -fx-border-radius: 6px;
             -fx-border-color: transparent;
-            -fx-border-width: 2px;
+            -fx-border-width: 1px;
             -fx-padding: 8px;
             -fx-cursor: hand;
         }
         .hero-card:hover {
-            -fx-border-color: #4FA6FD;
+            -fx-background-color: #3E4257;
         }
         .hero-card:pressed {
-            -fx-background-color: #1E293B;
+            -fx-background-color: #32364A;
         }
 
         .hero-avatar {
-            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 6, 0, 0, 2);
         }
 
         .hero-name {
             -fx-font-size: 11px;
             -fx-font-weight: 400;
-            -fx-text-fill: #CBD5E1;
+            -fx-text-fill: #FFFFFF;
             -fx-text-alignment: center;
         }
 
         .priority-badge {
-            -fx-background-color: #4FA6FD;
-            -fx-background-radius: 8px;
-            -fx-text-fill: white;
+            -fx-background-color: #00CC74;
+            -fx-background-radius: 6px;
+            -fx-text-fill: #1D2033;
             -fx-font-size: 10px;
             -fx-font-weight: 600;
             -fx-padding: 2px 6px;
@@ -163,13 +158,13 @@ public class HeroPriorityConfigWindow {
             -fx-background-color: transparent;
         }
         .scroll-pane .scroll-bar:vertical .thumb {
-            -fx-background-color: #334155;
+            -fx-background-color: #3E4257;
             -fx-background-radius: 6px;
             -fx-min-width: 6px;
             -fx-pref-width: 6px;
         }
         .scroll-pane .scroll-bar:vertical .thumb:hover {
-            -fx-background-color: #475569;
+            -fx-background-color: #939292;
         }
         .scroll-pane .scroll-bar:vertical .increment-button,
         .scroll-pane .scroll-bar:vertical .decrement-button {
@@ -181,11 +176,11 @@ public class HeroPriorityConfigWindow {
         }
 
         .button {
-            -fx-background-color: #1E293B;
-            -fx-text-fill: #E2E8F0;
+            -fx-background-color: #282B3D;
+            -fx-text-fill: #FFFFFF;
             -fx-font-size: 13px;
             -fx-font-weight: 500;
-            -fx-border-color: #334155;
+            -fx-border-color: #3E4257;
             -fx-border-width: 1px;
             -fx-background-radius: 6px;
             -fx-border-radius: 6px;
@@ -193,11 +188,10 @@ public class HeroPriorityConfigWindow {
             -fx-padding: 8px 16px;
         }
         .button:hover {
-            -fx-border-color: #4FA6FD;
-            -fx-background-color: #2D3748;
+            -fx-background-color: #3E4257;
         }
         .button:pressed {
-            -fx-background-color: #374151;
+            -fx-background-color: #32364A;
         }
 
         .button-danger {
@@ -206,23 +200,22 @@ public class HeroPriorityConfigWindow {
         }
         .button-danger:hover {
             -fx-text-fill: #FEE2E2;
-            -fx-border-color: #DC2626;
             -fx-background-color: #7F1D1D;
         }
 
         .button-primary {
-            -fx-text-fill: #BFDBFE;
-            -fx-border-color: #1E40AF;
+            -fx-text-fill: #FFFFFF;
+            -fx-border-color: #00CC74;
+            -fx-background-color: #00CC74;
         }
         .button-primary:hover {
-            -fx-text-fill: #EFF6FF;
-            -fx-border-color: #3B82F6;
-            -fx-background-color: #1E40AF;
+            -fx-background-color: #00AA62;
+            -fx-border-color: #00AA62;
         }
         """;
 
     // 占位头像 SVG 数据（LOL 风格的占位图标）
-    private static final String PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%231E293B;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%230F172A;stop-opacity:1' /%3E%3C/linearGradient%3E%3ClinearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234FA6FD;stop-opacity:0.8' /%3E%3Cstop offset='100%25' style='stop-color:%238B5CF6;stop-opacity:0.8' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grad1)'/%3E%3Ccircle cx='50' cy='50' r='35' fill='none' stroke='url(%23grad2)' stroke-width='3'/%3E%3Ccircle cx='50' cy='42' r='12' fill='%234FA6FD' opacity='0.6'/%3E%3Cpath d='M 25 75 Q 50 55 75 75' fill='none' stroke='%234FA6FD' stroke-width='3' opacity='0.6'/%3E%3C/svg%3E";
+    private static final String PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23282B3D;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%231D2033;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grad1)'/%3E%3Ccircle cx='50' cy='50' r='35' fill='none' stroke='%2300CC74' stroke-width='3'/%3E%3Ccircle cx='50' cy='42' r='12' fill='%2300CC74' opacity='0.6'/%3E%3Cpath d='M 25 75 Q 50 55 75 75' fill='none' stroke='%2300CC74' stroke-width='3' opacity='0.6'/%3E%3C/svg%3E";
 
     // ==================== 常量定义 ====================
     
@@ -352,7 +345,7 @@ public class HeroPriorityConfigWindow {
         priorityFlowPane.getStyleClass().add("hero-grid");
 
         // 创建插入位置指示线
-        insertLine = new Rectangle(3, 90, Color.web("#4FA6FD"));
+        insertLine = new Rectangle(3, 90, Color.web("#00CC74"));
         insertLine.setArcWidth(2);
         insertLine.setArcHeight(2);
         insertLine.setVisible(false);
@@ -742,7 +735,7 @@ public class HeroPriorityConfigWindow {
      */
     private static VBox createDragPreview(String heroName) {
         VBox preview = createHeroCardBase(heroName, null);
-        preview.setStyle("-fx-border-color: #4FA6FD; -fx-border-width: 2px;");
+        preview.setStyle("-fx-border-color: #00CC74; -fx-border-width: 2px;");
         preview.setOpacity(0.85);
         preview.setMouseTransparent(true);
         preview.setManaged(false);
