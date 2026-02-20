@@ -773,9 +773,11 @@ public class HeroPriorityConfigWindow {
         Bounds viewportBounds = rightScrollPane.getBoundsInLocal();
         double scrollOffset = rightScrollPane.getVvalue() * (priorityFlowPane.getHeight() - viewportBounds.getHeight());
 
+        Bounds flowPaneBounds = priorityFlowPane.getBoundsInParent();
+        double flowX = mouseX - flowPaneBounds.getMinX();
         double flowY = mouseY + scrollOffset;
 
-        int newInsertIndex = calculateInsertIndex(mouseX, flowY);
+        int newInsertIndex = calculateInsertIndex(flowX, flowY);
         if (newInsertIndex != insertIndex) {
             insertIndex = newInsertIndex;
             updateInsertLinePosition(newInsertIndex);
@@ -894,6 +896,9 @@ public class HeroPriorityConfigWindow {
             return 0;
         }
 
+        double minDistance = Double.MAX_VALUE;
+        int nearestIndex = size;
+
         for (int i = 0; i < size; i++) {
             javafx.scene.Node node = children.get(i);
             Bounds bounds = node.getBoundsInParent();
@@ -903,6 +908,17 @@ public class HeroPriorityConfigWindow {
                     return i;
                 }
             }
+
+            double centerX = (bounds.getMinX() + bounds.getMaxX()) / 2.0;
+            double centerY = (bounds.getMinY() + bounds.getMaxY()) / 2.0;
+            double dx = mouseX - centerX;
+            double dy = flowY - centerY;
+            double distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestIndex = i;
+            }
         }
 
         Bounds lastBounds = children.get(size - 1).getBoundsInParent();
@@ -910,7 +926,13 @@ public class HeroPriorityConfigWindow {
             return size;
         }
 
-        return size;
+        if (flowY >= lastBounds.getMinY() && flowY <= lastBounds.getMaxY()) {
+            if (mouseX > lastBounds.getMaxX()) {
+                return size;
+            }
+        }
+
+        return nearestIndex;
     }
 
     /**
