@@ -6,7 +6,6 @@ import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.EventTarget;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -429,19 +428,33 @@ public class HeroPriorityConfigWindow {
         });
         cancelButton.setOnAction(e -> window.close());
 
-        // 窗口拖拽功能（在标题栏空白区域拖动可移动窗口）
+        // 窗口拖拽功能（在标题栏区域拖动可移动窗口）
         final double[] xOffset = {0}, yOffset = {0};
-        rootLayout.setOnMousePressed(event -> {
-            if (!isDragging && event.getTarget() == rootLayout) {
+        final boolean[] canDragWindow = {false};
+        
+        titleContainer.setOnMousePressed(event -> {
+            if (!isDragging && event.getButton() == MouseButton.PRIMARY) {
+                canDragWindow[0] = true;
                 xOffset[0] = event.getSceneX();
                 yOffset[0] = event.getSceneY();
+                event.consume();
             }
         });
+        
+        titleContainer.setOnMouseReleased(event -> {
+            canDragWindow[0] = false;
+        });
+        
         rootLayout.setOnMouseDragged(event -> {
-            if (!isDragging && event.getTarget() == rootLayout) {
+            if (!isDragging && canDragWindow[0] && event.getButton() == MouseButton.PRIMARY) {
                 window.setX(event.getScreenX() - xOffset[0]);
                 window.setY(event.getScreenY() - yOffset[0]);
+                event.consume();
             }
+        });
+        
+        rootLayout.setOnMouseReleased(event -> {
+            canDragWindow[0] = false;
         });
 
         window.setScene(scene);
