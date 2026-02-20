@@ -585,176 +585,89 @@ public class HeroPriorityConfigWindow {
     private static VBox createPriorityHeroCard(String heroName, int priority) {
         VBox card = createHeroCardBase(heroName, priority);
         card.setUserData(heroName);
-
-//        card.setOnMousePressed(event -> {
-//            if (event.getButton() == MouseButton.PRIMARY) {
-//                System.out.println("[右侧卡片] MousePressed - 英雄: " + heroName + ", 坐标: (" + event.getX() + ", " + event.getY() + ")");
-//                handlePriorityCardPress(card, heroName, event);
-//            }
-//        });
-////
-//        card.setOnMouseReleased(event -> {
-//            if (event.getButton() == MouseButton.PRIMARY) {
-//                System.out.println("[右侧卡片] MouseReleased - 英雄: " + heroName + ", timerTriggered: " + timerTriggered + ", isDragging: " + isDragging);
-//                handlePriorityCardRelease(heroName);
-//            }
-//        });
-
         return card;
     }
 
     // ==================== 右侧事件处理方法 ====================
 
     /**
-     * 处理右侧卡片的鼠标按下事件
-     * 
-     * 功能：
-     * 1. 记录按下时的坐标
-     * 2. 启动 300ms 定时器
-     * 3. 如果定时器触发，则进入拖拽模式
-     * 
-     * @param card 被按下的卡片
-     * @param heroName 英雄名称
-     * @param event 鼠标事件
-     */
-    private static void handlePriorityCardPress(VBox card, String heroName, javafx.scene.input.MouseEvent event) {
-        pressX = event.getX();
-        pressY = event.getY();
-        timerTriggered = false;
-        draggedCard = card;
-
-        System.out.println("[右侧卡片] 启动定时器 - 等待 " + DRAG_DELAY_MS + "ms");
-
-        if (dragTimer != null){
-            dragTimer.stop();
-            dragTimer = null;
-        }
-
-        dragTimer = new PauseTransition(Duration.millis(DRAG_DELAY_MS));
-        dragTimer.setOnFinished(e -> {
-            dragTimer = null;
-            System.out.println("[右侧卡片] 定时器触发 - 进入拖拽模式");
-            timerTriggered = true;
-            startDragMode(card, heroName, event);
-        });
-        dragTimer.play();
-    }
-
-    private static void handlePriorityCardRelease(String heroName) {
-        if (dragTimer != null) {
-            dragTimer.stop();
-            dragTimer = null;
-            System.out.println("[右侧卡片] 定时器已停止（点击模式）");
-            moveToAvailable(heroName);
-        } else if (isDragging) {
-            System.out.println("[右侧卡片] 完成拖拽模式");
-            finishDragMode();
-        }
-        timerTriggered = false;
-        draggedCard = null;
-    }
-
-    /**
      * 设置右侧滚动容器的事件处理器
-     * 
-     * 包含三个事件：
-     * 1. MouseDragged - 追踪鼠标移动，更新拖拽预览位置
-     * 2. MouseReleased - 处理鼠标释放，判断是点击还是拖拽结束
-     * 3. MouseExited - 鼠标离开时取消定时器
      */
     private static void setupRightScrollPaneEvents() {
 
-//      rightScrollPane.addEventFilter(MouseEvent.MOUSE_MOVED, event -> {
-//          System.out.println("[右侧ScrollPane] MouseMoved - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
-//      });
-        rightScrollPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
-      //      System.out.println("[右侧ScrollPane] MouseDragged - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
+        rightScrollPane.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+            if (event.getButton() != MouseButton.PRIMARY) return;
+
+            String heroName = getHeroNameFromEvent(event);
+            if (heroName == null) return;
+
+            Node target = (Node) event.getTarget();
+            VBox card = null;
+            while (target != null && target != rightScrollPane) {
+                if (target instanceof VBox && target.getUserData() instanceof String) {
+                    card = (VBox) target;
+                    break;
+                }
+                target = target.getParent();
+            }
+            if (card == null) return;
+
+            pressX = event.getX();
+            pressY = event.getY();
+            timerTriggered = false;
+            draggedCard = card;
+            draggedHeroName = heroName;
+
+            System.out.println("[右侧ScrollPane] MousePressed - 英雄: " + heroName + ", 启动定时器");
+
+            if (dragTimer != null) {
+                dragTimer.stop();
+                dragTimer = null;
+            }
+
+            dragTimer = new PauseTransition(Duration.millis(DRAG_DELAY_MS));
+            VBox finalCard = card;
+            dragTimer.setOnFinished(e -> {
+                dragTimer = null;
+                System.out.println("[右侧ScrollPane] 定时器触发 - 进入拖拽模式");
+                timerTriggered = true;
+                startDragMode(finalCard, heroName, event);
+            });
+            dragTimer.play();
         });
 
-        // 鼠标拖拽事件
-//        rightScrollPane.setOnMouseDragged(event -> {
-//            System.out.println("[右侧ScrollPane] MouseDragged - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
-//
-//            if (!isDragging) {
-//                // 未进入拖拽模式时，检查移动距离
-//                if (dragTimer != null) {
-//                    double dx = event.getX() - pressX;
-//                    double dy = event.getY() - pressY;
-//                    double distance = Math.sqrt(dx * dx + dy * dy);
-//                    System.out.println("[右侧ScrollPane] 移动距离: " + distance + ", 阈值: " + DRAG_THRESHOLD);
-//
-//                    if (distance > DRAG_THRESHOLD) {
-//                        // 移动距离过大，取消定时器（不进入拖拽模式）
-//                        System.out.println("[右侧ScrollPane] 移动距离超过阈值，取消定时器");
-//                        dragTimer.stop();
-//                        dragTimer = null;
-//                    }
-//                }
-//                return;
-//            }
-//
-//            // 已进入拖拽模式，更新预览位置
-//            double mouseX = event.getX();
-//            double mouseY = event.getY();
-//
-//            updateDragPreviewPosition(mouseX, mouseY);
-//            updateInsertPosition(mouseX, mouseY);
-//            handleAutoScroll(mouseY);
-//        });
+        rightScrollPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
+            if (!isDragging) return;
 
-        rightScrollPane.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-            String heroName = getHeroNameFromEvent(event);
-            System.out.println("[右侧ScrollPane] MousePressed - 坐标: (" + event.getX() + ", " + event.getY() + "), 英雄: " + heroName);
+            double mouseX = event.getX();
+            double mouseY = event.getY();
+
+            updateDragPreviewPosition(mouseX, mouseY);
+            updateInsertPosition(mouseX, mouseY);
+            handleAutoScroll(mouseY);
         });
 
         rightScrollPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
-            System.out.println("[右侧ScrollPane] MouseReleased - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
+            if (event.getButton() != MouseButton.PRIMARY) return;
+
+            System.out.println("[右侧ScrollPane] MouseReleased - timerTriggered: " + timerTriggered + ", isDragging: " + isDragging);
+
+            if (dragTimer != null) {
+                dragTimer.stop();
+                dragTimer = null;
+                System.out.println("[右侧ScrollPane] 定时器已停止（点击模式）");
+                if (draggedHeroName != null) {
+                    moveToAvailable(draggedHeroName);
+                }
+            } else if (isDragging) {
+                System.out.println("[右侧ScrollPane] 完成拖拽模式");
+                finishDragMode();
+            }
+
+            timerTriggered = false;
+            draggedCard = null;
+            draggedHeroName = null;
         });
-
-
-//        rightScrollPane.setOnMouseReleased(event -> {
-//            System.out.println("[右侧ScrollPane] MouseReleased - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
-//        });
-
-
-//        // 鼠标释放事件
-//        rightScrollPane.setOnMouseReleased(event -> {
-//            System.out.println("[右侧ScrollPane] MouseReleased - timerTriggered: " + timerTriggered + ", isDragging: " + isDragging);
-//
-//            if (dragTimer != null) {
-//                dragTimer.stop();
-//                System.out.println("[右侧ScrollPane] 定时器已停止");
-//
-//                // 如果定时器未触发且卡片存在，则执行点击逻辑（移回左侧）
-//                if (!timerTriggered && draggedCard != null) {
-//                    String heroName = (String) draggedCard.getUserData();
-//                    if (heroName != null) {
-//                        System.out.println("[右侧ScrollPane] 执行点击逻辑 - 英雄: " + heroName + " → 移回左侧");
-//                        moveToAvailable(heroName);
-//                    }
-//                }
-//                dragTimer = null;
-//            }
-//
-//            // 如果处于拖拽模式，完成拖拽
-//            if (isDragging) {
-//                System.out.println("[右侧ScrollPane] 完成拖拽模式");
-//                finishDragMode();
-//            }
-//
-//            draggedCard = null;
-//            timerTriggered = false;
-//        });
-//
-//        // 鼠标离开事件
-//        rightScrollPane.setOnMouseExited(event -> {
-//            System.out.println("[右侧ScrollPane] MouseExited");
-//            if (dragTimer != null && !isDragging) {
-//                System.out.println("[右侧ScrollPane] 鼠标离开，取消定时器");
-//                dragTimer.stop();
-//                dragTimer = null;
-//            }
-//        });
     }
 
     // ==================== 拖拽模式方法 ====================
