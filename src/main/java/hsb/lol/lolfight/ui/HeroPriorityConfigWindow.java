@@ -6,9 +6,11 @@ import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.EventTarget;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -582,15 +584,21 @@ public class HeroPriorityConfigWindow {
      */
     private static VBox createPriorityHeroCard(String heroName, int priority) {
         VBox card = createHeroCardBase(heroName, priority);
-        card.setUserData(heroName);  // 存储英雄名称，用于后续事件处理
+        card.setUserData(heroName);
 
-        // 鼠标按下事件：启动长按定时器
-        card.setOnMousePressed(event -> {
-            if (event.getButton() == MouseButton.PRIMARY) {
-                System.out.println("[右侧卡片] MousePressed - 英雄: " + heroName + ", 坐标: (" + event.getX() + ", " + event.getY() + ")");
-                handlePriorityCardPress(card, heroName, event);
-            }
-        });
+//        card.setOnMousePressed(event -> {
+//            if (event.getButton() == MouseButton.PRIMARY) {
+//                System.out.println("[右侧卡片] MousePressed - 英雄: " + heroName + ", 坐标: (" + event.getX() + ", " + event.getY() + ")");
+//                handlePriorityCardPress(card, heroName, event);
+//            }
+//        });
+////
+//        card.setOnMouseReleased(event -> {
+//            if (event.getButton() == MouseButton.PRIMARY) {
+//                System.out.println("[右侧卡片] MouseReleased - 英雄: " + heroName + ", timerTriggered: " + timerTriggered + ", isDragging: " + isDragging);
+//                handlePriorityCardRelease(heroName);
+//            }
+//        });
 
         return card;
     }
@@ -613,17 +621,15 @@ public class HeroPriorityConfigWindow {
         pressX = event.getX();
         pressY = event.getY();
         timerTriggered = false;
-        draggedCard = card;  // 记录被按下的卡片
+        draggedCard = card;
 
         System.out.println("[右侧卡片] 启动定时器 - 等待 " + DRAG_DELAY_MS + "ms");
 
-        //清空上一个定时器
         if (dragTimer != null){
             dragTimer.stop();
             dragTimer = null;
         }
 
-        //todo 这里每次点击后都开启了倒计时，但是如果提前释放按钮，那么应该直接结束倒计时
         dragTimer = new PauseTransition(Duration.millis(DRAG_DELAY_MS));
         dragTimer.setOnFinished(e -> {
             dragTimer = null;
@@ -632,6 +638,20 @@ public class HeroPriorityConfigWindow {
             startDragMode(card, heroName, event);
         });
         dragTimer.play();
+    }
+
+    private static void handlePriorityCardRelease(String heroName) {
+        if (dragTimer != null) {
+            dragTimer.stop();
+            dragTimer = null;
+            System.out.println("[右侧卡片] 定时器已停止（点击模式）");
+            moveToAvailable(heroName);
+        } else if (isDragging) {
+            System.out.println("[右侧卡片] 完成拖拽模式");
+            finishDragMode();
+        }
+        timerTriggered = false;
+        draggedCard = null;
     }
 
     /**
@@ -644,11 +664,11 @@ public class HeroPriorityConfigWindow {
      */
     private static void setupRightScrollPaneEvents() {
 
-//        rightScrollPane.addEventFilter(MouseEvent.MOUSE_MOVED, event -> {
-//            System.out.println("[右侧ScrollPane] MouseMoved - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
-//        });
+//      rightScrollPane.addEventFilter(MouseEvent.MOUSE_MOVED, event -> {
+//          System.out.println("[右侧ScrollPane] MouseMoved - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
+//      });
         rightScrollPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
-            System.out.println("[右侧ScrollPane] MouseDragged - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
+      //      System.out.println("[右侧ScrollPane] MouseDragged - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
         });
 
         // 鼠标拖拽事件
@@ -681,7 +701,22 @@ public class HeroPriorityConfigWindow {
 //            updateInsertPosition(mouseX, mouseY);
 //            handleAutoScroll(mouseY);
 //        });
-//
+
+        rightScrollPane.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+            String heroName = getHeroNameFromEvent(event);
+            System.out.println("[右侧ScrollPane] MousePressed - 坐标: (" + event.getX() + ", " + event.getY() + "), 英雄: " + heroName);
+        });
+
+        rightScrollPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
+            System.out.println("[右侧ScrollPane] MouseReleased - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
+        });
+
+
+//        rightScrollPane.setOnMouseReleased(event -> {
+//            System.out.println("[右侧ScrollPane] MouseReleased - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
+//        });
+
+
 //        // 鼠标释放事件
 //        rightScrollPane.setOnMouseReleased(event -> {
 //            System.out.println("[右侧ScrollPane] MouseReleased - timerTriggered: " + timerTriggered + ", isDragging: " + isDragging);
@@ -888,6 +923,24 @@ public class HeroPriorityConfigWindow {
     }
 
     // ==================== 计算方法 ====================
+
+    /**
+     * 根据鼠标事件获取当前点击位置的英雄卡片信息
+     *
+     * @param event 鼠标事件
+     * @return 英雄名称，如果未点击到英雄卡片则返回 null
+     */
+    private static String getHeroNameFromEvent(MouseEvent event) {
+        Node target = (Node) event.getTarget();
+
+        while (target != null && target != rightScrollPane) {
+            if (target instanceof VBox && target.getUserData() instanceof String) {
+                return (String) target.getUserData();
+            }
+            target = target.getParent();
+        }
+        return null;
+    }
 
     /**
      * 计算插入位置索引
