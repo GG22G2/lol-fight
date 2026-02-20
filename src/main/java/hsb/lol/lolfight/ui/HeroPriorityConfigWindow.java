@@ -2,6 +2,7 @@ package hsb.lol.lolfight.ui;
 
 import hsb.lol.lolfight.config.Config;
 import hsb.lol.lolfight.data.Summoner;
+import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -16,24 +17,32 @@ import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 英雄优先级配置窗口
+ * 
+ * 功能说明：
+ * - 左侧显示所有可用英雄，点击可添加到右侧优先级列表
+ * - 右侧显示已选英雄，支持拖拽排序，点击可移回左侧
+ * - 使用自定义鼠标事件实现拖拽，避免 JavaFX DragBoard 机制的滚动限制
+ */
 public class HeroPriorityConfigWindow {
 
-    // LOL暗黑电竞风格CSS
+    // ==================== CSS 样式定义 ====================
+    
     private static final String CSS_STYLE = """
         .root {
             -fx-background-color: #0F172A;
@@ -210,28 +219,60 @@ public class HeroPriorityConfigWindow {
         }
         """;
 
-    // 占位头像SVG数据（LOL风格的占位图标）
+    // 占位头像 SVG 数据（LOL 风格的占位图标）
     private static final String PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%231E293B;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%230F172A;stop-opacity:1' /%3E%3C/linearGradient%3E%3ClinearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234FA6FD;stop-opacity:0.8' /%3E%3Cstop offset='100%25' style='stop-color:%238B5CF6;stop-opacity:0.8' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grad1)'/%3E%3Ccircle cx='50' cy='50' r='35' fill='none' stroke='url(%23grad2)' stroke-width='3'/%3E%3Ccircle cx='50' cy='42' r='12' fill='%234FA6FD' opacity='0.6'/%3E%3Cpath d='M 25 75 Q 50 55 75 75' fill='none' stroke='%234FA6FD' stroke-width='3' opacity='0.6'/%3E%3C/svg%3E";
 
-    private static ObservableList<String> priorityHeroes;
-    private static ObservableList<String> availableHeroes;
-    private static FilteredList<String> filteredHeroes;
-    private static FlowPane priorityFlowPane;
-    private static FlowPane availableFlowPane;
-    private static TextField searchField;
-    private static Rectangle insertLine;
-    private static int insertIndex = -1;
-    private static final int HERO_CARD_SIZE = 85;
-    private static final int AVATAR_SIZE = 55;
-    private static final int CARD_GAP = 8;
+    // ==================== 常量定义 ====================
+    
+    private static final int HERO_CARD_SIZE = 85;       // 英雄卡片宽度
+    private static final int AVATAR_SIZE = 55;          // 头像尺寸
+    private static final int CARD_GAP = 8;              // 卡片间距
+    private static final double DRAG_THRESHOLD = 10.0;  // 拖拽判定阈值（像素）
+    private static final double DRAG_DELAY_MS = 300;    // 长按进入拖拽模式的延迟（毫秒）
 
+    // ==================== UI 组件引用 ====================
+    
+    private static ObservableList<String> priorityHeroes;    // 优先级列表中的英雄
+    private static ObservableList<String> availableHeroes;   // 可用英雄列表
+    private static FilteredList<String> filteredHeroes;      // 过滤后的可用英雄
+    private static FlowPane priorityFlowPane;                // 右侧优先级卡片容器
+    private static FlowPane availableFlowPane;               // 左侧可用卡片容器
+    private static TextField searchField;                    // 搜索输入框
+    private static ScrollPane rightScrollPane;               // 右侧滚动容器
+    private static StackPane priorityStack;                  // 右侧 StackPane（包含 FlowPane 和插入线）
+    private static Rectangle insertLine;                     // 拖拽时的插入位置指示线
+
+    // ==================== 拖拽状态变量 ====================
+    
+    private static boolean isDragging = false;           // 是否处于拖拽模式
+    private static String draggedHeroName = null;        // 当前拖拽的英雄名称
+    private static VBox draggedCard = null;              // 当前拖拽的原始卡片
+    private static VBox dragPreview = null;              // 拖拽时的预览卡片
+    private static int insertIndex = -1;                 // 当前插入位置索引
+
+    // ==================== 定时器相关变量 ====================
+    
+    private static double pressX = 0;                    // 鼠标按下时的 X 坐标
+    private static double pressY = 0;                    // 鼠标按下时的 Y 坐标
+    private static PauseTransition dragTimer;            // 长按定时器
+    private static boolean timerTriggered = false;       // 定时器是否已触发
+
+    /**
+     * 显示英雄优先级配置窗口
+     * 
+     * 这是窗口的入口方法，负责：
+     * 1. 初始化数据（从配置加载已选英雄，从召唤师数据加载所有英雄）
+     * 2. 构建左右两栏 UI
+     * 3. 绑定事件处理器
+     * 4. 显示模态窗口
+     */
     public static void display() {
         Stage window = new Stage();
         window.initModality(Modality.APPLICATION_MODAL);
         window.initStyle(StageStyle.TRANSPARENT);
         window.setTitle("英雄优先级配置");
 
-        // 数据初始化
+        // 初始化数据
         priorityHeroes = FXCollections.observableArrayList(Config.heroNames);
         availableHeroes = FXCollections.observableArrayList();
         boolean allChampionsAvailable = (Summoner.allChampions != null && !Summoner.allChampions.isEmpty());
@@ -242,7 +283,7 @@ public class HeroPriorityConfigWindow {
         }
         FXCollections.sort(availableHeroes);
 
-        // 创建标题区域
+        // 构建标题区域
         Label titleLabel = new Label("英雄优先级配置");
         titleLabel.getStyleClass().add("window-title");
         Region titleUnderline = new Region();
@@ -251,7 +292,7 @@ public class HeroPriorityConfigWindow {
         titleContainer.setAlignment(Pos.CENTER);
         titleContainer.setPadding(new Insets(18, 0, 12, 0));
 
-        // 左侧面板 - 全部英雄
+        // 构建左侧面板（可用英雄列表）
         Label leftHeaderLabel = new Label("全部英雄");
         leftHeaderLabel.getStyleClass().add("column-header");
 
@@ -278,7 +319,7 @@ public class HeroPriorityConfigWindow {
         VBox.setVgrow(leftScrollPane, Priority.ALWAYS);
         leftPanel.setDisable(!allChampionsAvailable);
 
-        // 搜索过滤
+        // 搜索过滤功能
         filteredHeroes = new FilteredList<>(availableHeroes, p -> true);
         searchField.textProperty().addListener((obs, oldV, newV) -> {
             filteredHeroes.setPredicate(hero ->
@@ -286,7 +327,7 @@ public class HeroPriorityConfigWindow {
             refreshAvailableFlowPane(filteredHeroes);
         });
 
-        // 右侧面板 - 已选英雄
+        // 构建右侧面板（优先级列表）
         Label rightHeaderLabel = new Label("优先级列表 (拖动排序)");
         rightHeaderLabel.getStyleClass().add("column-header");
 
@@ -298,8 +339,8 @@ public class HeroPriorityConfigWindow {
         rightHeader.getChildren().addAll(rightHeaderLabel, new Region(), clearButton);
         HBox.setHgrow(rightHeaderLabel, Priority.ALWAYS);
 
-        // 创建优先级面板，使用 StackPane 支持插入线
-        StackPane priorityStack = new StackPane();
+        // 创建优先级面板容器
+        priorityStack = new StackPane();
         priorityStack.setAlignment(Pos.TOP_LEFT);
 
         priorityFlowPane = new FlowPane();
@@ -308,7 +349,7 @@ public class HeroPriorityConfigWindow {
         priorityFlowPane.setPadding(new Insets(6, 0, 6, 0));
         priorityFlowPane.getStyleClass().add("hero-grid");
 
-        // 插入线
+        // 创建插入位置指示线
         insertLine = new Rectangle(3, 90, Color.web("#4FA6FD"));
         insertLine.setArcWidth(2);
         insertLine.setArcHeight(2);
@@ -319,15 +360,16 @@ public class HeroPriorityConfigWindow {
 
         refreshPriorityFlowPane();
 
-        // 全局拖拽处理 - 在StackPane上处理
-        setupGlobalDragHandlers();
-
-        ScrollPane rightScrollPane = new ScrollPane(priorityStack);
+        // 创建右侧滚动容器
+        rightScrollPane = new ScrollPane(priorityStack);
         rightScrollPane.getStyleClass().add("scroll-pane");
         rightScrollPane.setFitToWidth(true);
         rightScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         rightScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         rightScrollPane.setPrefViewportHeight(400);
+
+        // 设置右侧滚动容器的事件处理器
+        setupRightScrollPaneEvents();
 
         VBox rightPanel = new VBox(10, rightHeader, rightScrollPane);
         rightPanel.getStyleClass().add("panel");
@@ -339,20 +381,15 @@ public class HeroPriorityConfigWindow {
             priorityHeroes.clear();
             FXCollections.sort(availableHeroes);
             refreshPriorityFlowPane();
-            // 刷新可用列表时保持搜索过滤
-            if (searchField != null && searchField.getText() != null && !searchField.getText().isEmpty()) {
-                refreshAvailableFlowPane(filteredHeroes);
-            } else {
-                refreshAvailableFlowPane(availableHeroes);
-            }
+            refreshAvailableFlowPaneByFilter();
         });
 
-        // 主内容区域
+        // 构建主内容区域（左右两栏）
         HBox mainContent = new HBox(14, leftPanel, rightPanel);
         HBox.setHgrow(leftPanel, Priority.ALWAYS);
         HBox.setHgrow(rightPanel, Priority.ALWAYS);
 
-        // 底部按钮
+        // 构建底部按钮区域
         Button saveButton = new Button("保存并应用");
         saveButton.getStyleClass().addAll("button", "button-primary");
         Button cancelButton = new Button("取消");
@@ -362,7 +399,7 @@ public class HeroPriorityConfigWindow {
         bottomBox.setAlignment(Pos.CENTER);
         bottomBox.setPadding(new Insets(16, 0, 8, 0));
 
-        // 根布局
+        // 构建根布局
         BorderPane rootLayout = new BorderPane();
         rootLayout.setTop(titleContainer);
         rootLayout.setCenter(mainContent);
@@ -381,7 +418,7 @@ public class HeroPriorityConfigWindow {
             e.printStackTrace();
         }
 
-        // 按钮事件
+        // 保存按钮事件
         saveButton.setOnAction(e -> {
             Config.heroNames = new ArrayList<>(priorityHeroes);
             Config.save();
@@ -389,68 +426,98 @@ public class HeroPriorityConfigWindow {
         });
         cancelButton.setOnAction(e -> window.close());
 
-        // 窗口拖拽
+        // 窗口拖拽功能（在标题栏空白区域拖动可移动窗口）
         final double[] xOffset = {0}, yOffset = {0};
         rootLayout.setOnMousePressed(event -> {
-            xOffset[0] = event.getSceneX();
-            yOffset[0] = event.getSceneY();
+            if (!isDragging && event.getTarget() == rootLayout) {
+                xOffset[0] = event.getSceneX();
+                yOffset[0] = event.getSceneY();
+            }
         });
         rootLayout.setOnMouseDragged(event -> {
-            window.setX(event.getScreenX() - xOffset[0]);
-            window.setY(event.getScreenY() - yOffset[0]);
+            if (!isDragging && event.getTarget() == rootLayout) {
+                window.setX(event.getScreenX() - xOffset[0]);
+                window.setY(event.getScreenY() - yOffset[0]);
+            }
         });
 
         window.setScene(scene);
         window.showAndWait();
     }
 
-    // 刷新可用英雄网格
+    // ==================== 刷新方法 ====================
+
+    /**
+     * 刷新左侧可用英雄列表
+     * 
+     * @param heroes 要显示的英雄名称列表
+     */
     private static void refreshAvailableFlowPane(List<String> heroes) {
         availableFlowPane.getChildren().clear();
         for (String heroName : heroes) {
-            VBox heroCard = createHeroCard(heroName, false);
+            VBox heroCard = createAvailableHeroCard(heroName);
             availableFlowPane.getChildren().add(heroCard);
         }
     }
 
-    // 刷新优先级英雄网格
+    /**
+     * 根据当前搜索过滤条件刷新左侧可用英雄列表
+     * 
+     * 如果搜索框有内容，显示过滤后的结果；否则显示全部可用英雄
+     */
+    private static void refreshAvailableFlowPaneByFilter() {
+        if (searchField != null && searchField.getText() != null && !searchField.getText().isEmpty()) {
+            refreshAvailableFlowPane(filteredHeroes);
+        } else {
+            refreshAvailableFlowPane(availableHeroes);
+        }
+    }
+
+    /**
+     * 刷新右侧优先级列表
+     * 
+     * 重新创建所有优先级卡片，并更新优先级徽章数字
+     */
     private static void refreshPriorityFlowPane() {
         priorityFlowPane.getChildren().clear();
         insertIndex = -1;
         insertLine.setVisible(false);
         for (int i = 0; i < priorityHeroes.size(); i++) {
             String heroName = priorityHeroes.get(i);
-            VBox heroCard = createHeroCard(heroName, true, i + 1);
+            VBox heroCard = createPriorityHeroCard(heroName, i + 1);
             priorityFlowPane.getChildren().add(heroCard);
         }
     }
 
-    // 创建英雄卡片（不带优先级徽章）
-    private static VBox createHeroCard(String heroName, boolean isPriority) {
-        return createHeroCard(heroName, isPriority, -1);
-    }
+    // ==================== 卡片创建方法 ====================
 
-    // 创建英雄卡片（带优先级徽章）
-    private static VBox createHeroCard(String heroName, boolean isPriority, int priority) {
+    /**
+     * 创建英雄卡片的基础 UI 组件
+     * 
+     * @param heroName 英雄名称
+     * @param priority 优先级数字（null 表示不显示徽章）
+     * @return 卡片 VBox 组件
+     */
+    private static VBox createHeroCardBase(String heroName, Integer priority) {
         VBox card = new VBox(6);
         card.setAlignment(Pos.TOP_CENTER);
         card.setPrefWidth(HERO_CARD_SIZE);
         card.setMaxWidth(HERO_CARD_SIZE);
         card.getStyleClass().add("hero-card");
 
-        // 头像容器
+        // 创建头像容器
         StackPane avatarContainer = new StackPane();
         avatarContainer.setPrefSize(AVATAR_SIZE, AVATAR_SIZE);
         avatarContainer.setMaxSize(AVATAR_SIZE, AVATAR_SIZE);
 
-        // 使用占位头像
+        // 创建头像图片
         ImageView avatar = new ImageView(new Image(PLACEHOLDER_SVG));
         avatar.setFitWidth(AVATAR_SIZE);
         avatar.setFitHeight(AVATAR_SIZE);
         avatar.setPreserveRatio(true);
         avatar.getStyleClass().add("hero-avatar");
 
-        // 圆角裁剪
+        // 设置圆角裁剪
         Rectangle clip = new Rectangle(AVATAR_SIZE, AVATAR_SIZE);
         clip.setArcWidth(12);
         clip.setArcHeight(12);
@@ -458,8 +525,8 @@ public class HeroPriorityConfigWindow {
 
         avatarContainer.getChildren().add(avatar);
 
-        // 优先级徽章
-        if (isPriority && priority > 0) {
+        // 添加优先级徽章（如果有）
+        if (priority != null && priority > 0) {
             Label priorityBadge = new Label(String.valueOf(priority));
             priorityBadge.getStyleClass().add("priority-badge");
             StackPane.setAlignment(priorityBadge, Pos.TOP_LEFT);
@@ -467,7 +534,7 @@ public class HeroPriorityConfigWindow {
             avatarContainer.getChildren().add(priorityBadge);
         }
 
-        // 英雄名称
+        // 创建英雄名称标签
         Label nameLabel = new Label(heroName);
         nameLabel.getStyleClass().add("hero-name");
         nameLabel.setWrapText(true);
@@ -475,128 +542,351 @@ public class HeroPriorityConfigWindow {
         nameLabel.setAlignment(Pos.CENTER);
 
         card.getChildren().addAll(avatarContainer, nameLabel);
+        return card;
+    }
 
-        // 点击事件 - 在双栏间移动
+    /**
+     * 创建左侧可用英雄卡片
+     * 
+     * 特点：只有点击事件，点击后移动到右侧优先级列表
+     * 
+     * @param heroName 英雄名称
+     * @return 卡片 VBox 组件
+     */
+    private static VBox createAvailableHeroCard(String heroName) {
+        VBox card = createHeroCardBase(heroName, null);
+
+        // 点击事件：移动到优先级列表
         card.setOnMouseClicked(event -> {
-            if (isPriority) {
-                // 从优先级移回可用
-                priorityHeroes.remove(heroName);
-                if (!availableHeroes.contains(heroName)) {
-                    availableHeroes.add(heroName);
-                    FXCollections.sort(availableHeroes);
-                }
-                refreshPriorityFlowPane();
-                // 刷新可用列表时保持搜索过滤
-                if (searchField != null && searchField.getText() != null && !searchField.getText().isEmpty()) {
-                    refreshAvailableFlowPane(filteredHeroes);
-                } else {
-                    refreshAvailableFlowPane(availableHeroes);
-                }
-            } else {
-                // 从可用移到优先级
-                availableHeroes.remove(heroName);
-                priorityHeroes.add(heroName);
-                refreshPriorityFlowPane();
-                // 刷新可用列表时保持搜索过滤
-                if (searchField != null && searchField.getText() != null && !searchField.getText().isEmpty()) {
-                    refreshAvailableFlowPane(filteredHeroes);
-                } else {
-                    refreshAvailableFlowPane(availableHeroes);
-                }
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 1) {
+                System.out.println("[左侧卡片] MouseClicked - 英雄: " + heroName + " → 移动到优先级列表");
+                moveToPriority(heroName);
             }
         });
-
-        // 拖拽功能仅在优先级面板启用
-        if (isPriority) {
-            setupDragAndDrop(card, heroName);
-        }
 
         return card;
     }
 
-    // 设置拖拽排序
-    private static void setupDragAndDrop(VBox card, String heroName) {
-        // 拖拽检测开始
-        card.setOnDragDetected(event -> {
-            Dragboard db = card.startDragAndDrop(TransferMode.MOVE);
-            ClipboardContent content = new ClipboardContent();
-            content.putString(heroName);
-            db.setContent(content);
-            card.setOpacity(0.5);
-            event.consume();
+    /**
+     * 创建右侧优先级英雄卡片
+     * 
+     * 特点：
+     * - 有 MousePressed 事件，用于启动长按定时器
+     * - 长按 300ms 后进入拖拽模式
+     * - 快速点击（300ms 内释放）则移回左侧
+     * 
+     * @param heroName 英雄名称
+     * @param priority 优先级数字
+     * @return 卡片 VBox 组件
+     */
+    private static VBox createPriorityHeroCard(String heroName, int priority) {
+        VBox card = createHeroCardBase(heroName, priority);
+        card.setUserData(heroName);  // 存储英雄名称，用于后续事件处理
+
+        // 鼠标按下事件：启动长按定时器
+        card.setOnMousePressed(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                System.out.println("[右侧卡片] MousePressed - 英雄: " + heroName + ", 坐标: (" + event.getX() + ", " + event.getY() + ")");
+                handlePriorityCardPress(card, heroName, event);
+            }
         });
 
-        // 拖拽完成
-        card.setOnDragDone(event -> {
-            card.setOpacity(1.0);
-            event.consume();
+        return card;
+    }
+
+    // ==================== 右侧事件处理方法 ====================
+
+    /**
+     * 处理右侧卡片的鼠标按下事件
+     * 
+     * 功能：
+     * 1. 记录按下时的坐标
+     * 2. 启动 300ms 定时器
+     * 3. 如果定时器触发，则进入拖拽模式
+     * 
+     * @param card 被按下的卡片
+     * @param heroName 英雄名称
+     * @param event 鼠标事件
+     */
+    private static void handlePriorityCardPress(VBox card, String heroName, javafx.scene.input.MouseEvent event) {
+        pressX = event.getX();
+        pressY = event.getY();
+        timerTriggered = false;
+        draggedCard = card;  // 记录被按下的卡片
+
+        System.out.println("[右侧卡片] 启动定时器 - 等待 " + DRAG_DELAY_MS + "ms");
+
+        dragTimer = new PauseTransition(Duration.millis(DRAG_DELAY_MS));
+        dragTimer.setOnFinished(e -> {
+            System.out.println("[右侧卡片] 定时器触发 - 进入拖拽模式");
+            timerTriggered = true;
+            startDragMode(card, heroName, event);
+        });
+        dragTimer.play();
+    }
+
+    /**
+     * 设置右侧滚动容器的事件处理器
+     * 
+     * 包含三个事件：
+     * 1. MouseDragged - 追踪鼠标移动，更新拖拽预览位置
+     * 2. MouseReleased - 处理鼠标释放，判断是点击还是拖拽结束
+     * 3. MouseExited - 鼠标离开时取消定时器
+     */
+    private static void setupRightScrollPaneEvents() {
+
+        rightScrollPane.setOnMouseMoved(event -> {
+            System.out.println("[右侧ScrollPane] MouseMoved - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
+        });
+
+        // 鼠标拖拽事件
+        rightScrollPane.setOnMouseDragged(event -> {
+            System.out.println("[右侧ScrollPane] MouseDragged - 坐标: (" + event.getX() + ", " + event.getY() + "), isDragging: " + isDragging);
+
+            if (!isDragging) {
+                // 未进入拖拽模式时，检查移动距离
+                if (dragTimer != null) {
+                    double dx = event.getX() - pressX;
+                    double dy = event.getY() - pressY;
+                    double distance = Math.sqrt(dx * dx + dy * dy);
+                    System.out.println("[右侧ScrollPane] 移动距离: " + distance + ", 阈值: " + DRAG_THRESHOLD);
+
+                    if (distance > DRAG_THRESHOLD) {
+                        // 移动距离过大，取消定时器（不进入拖拽模式）
+                        System.out.println("[右侧ScrollPane] 移动距离超过阈值，取消定时器");
+                        dragTimer.stop();
+                        dragTimer = null;
+                    }
+                }
+                return;
+            }
+
+            // 已进入拖拽模式，更新预览位置
+            double mouseX = event.getX();
+            double mouseY = event.getY();
+
+            updateDragPreviewPosition(mouseX, mouseY);
+            updateInsertPosition(mouseX, mouseY);
+            handleAutoScroll(mouseY);
+        });
+
+        // 鼠标释放事件
+        rightScrollPane.setOnMouseReleased(event -> {
+            System.out.println("[右侧ScrollPane] MouseReleased - timerTriggered: " + timerTriggered + ", isDragging: " + isDragging);
+
+            if (dragTimer != null) {
+                dragTimer.stop();
+                System.out.println("[右侧ScrollPane] 定时器已停止");
+
+                // 如果定时器未触发且卡片存在，则执行点击逻辑（移回左侧）
+                if (!timerTriggered && draggedCard != null) {
+                    String heroName = (String) draggedCard.getUserData();
+                    if (heroName != null) {
+                        System.out.println("[右侧ScrollPane] 执行点击逻辑 - 英雄: " + heroName + " → 移回左侧");
+                        moveToAvailable(heroName);
+                    }
+                }
+                dragTimer = null;
+            }
+
+            // 如果处于拖拽模式，完成拖拽
+            if (isDragging) {
+                System.out.println("[右侧ScrollPane] 完成拖拽模式");
+                finishDragMode();
+            }
+
+            draggedCard = null;
+            timerTriggered = false;
+        });
+
+        // 鼠标离开事件
+        rightScrollPane.setOnMouseExited(event -> {
+            System.out.println("[右侧ScrollPane] MouseExited");
+            if (dragTimer != null && !isDragging) {
+                System.out.println("[右侧ScrollPane] 鼠标离开，取消定时器");
+                dragTimer.stop();
+                dragTimer = null;
+            }
         });
     }
 
-    // 设置全局拖拽处理
-    private static void setupGlobalDragHandlers() {
-        // 拖拽经过
-        priorityFlowPane.setOnDragOver(event -> {
-            if (event.getDragboard().hasString()) {
-                event.acceptTransferModes(TransferMode.MOVE);
+    // ==================== 拖拽模式方法 ====================
 
-                // 计算插入位置
-                double mouseX = event.getX();
-                double mouseY = event.getY();
+    /**
+     * 进入拖拽模式
+     * 
+     * 功能：
+     * 1. 设置拖拽状态标志
+     * 2. 将原卡片设为半透明
+     * 3. 创建拖拽预览卡片
+     * 4. 显示插入位置指示线
+     * 
+     * @param card 被拖拽的卡片
+     * @param heroName 英雄名称
+     * @param event 鼠标事件
+     */
+    private static void startDragMode(VBox card, String heroName, javafx.scene.input.MouseEvent event) {
+        isDragging = true;
+        draggedHeroName = heroName;
+        draggedCard = card;
+        card.setOpacity(0.4);
 
-                int newInsertIndex = calculateInsertIndex(mouseX, mouseY);
+        // 创建拖拽预览卡片
+        dragPreview = createDragPreview(heroName);
+        priorityStack.getChildren().add(dragPreview);
 
-                if (newInsertIndex != insertIndex) {
-                    insertIndex = newInsertIndex;
-                    updateInsertLinePosition(newInsertIndex);
-                }
-            }
-            event.consume();
-        });
+        // 更新预览位置和插入位置
+        double mouseX = event.getX();
+        double mouseY = event.getY();
+        updateDragPreviewPosition(mouseX, mouseY);
 
-        // 拖拽离开
-        priorityFlowPane.setOnDragExited(event -> {
-            insertLine.setVisible(false);
-            event.consume();
-        });
-
-        // 拖拽进入
-        priorityFlowPane.setOnDragEntered(event -> {
-            if (event.getDragboard().hasString()) {
-                insertLine.setVisible(true);
-            }
-            event.consume();
-        });
-
-        // 拖拽释放
-        priorityFlowPane.setOnDragDropped(event -> {
-            Dragboard db = event.getDragboard();
-            boolean success = false;
-            if (db.hasString()) {
-                String draggedHero = db.getString();
-                int draggedIndex = priorityHeroes.indexOf(draggedHero);
-                if (draggedIndex != -1 && insertIndex != -1) {
-                    int targetIdx = insertIndex;
-                    if (draggedIndex < targetIdx) {
-                        targetIdx--;
-                    }
-                    if (draggedIndex != targetIdx && targetIdx >= 0) {
-                        priorityHeroes.remove(draggedIndex);
-                        priorityHeroes.add(targetIdx, draggedHero);
-                        refreshPriorityFlowPane();
-                        success = true;
-                    }
-                }
-            }
-            insertLine.setVisible(false);
-            insertIndex = -1;
-            event.setDropCompleted(success);
-            event.consume();
-        });
+        insertLine.setVisible(true);
+        updateInsertPosition(mouseX, mouseY);
+        
+        System.out.println("[拖拽模式] 已启动 - 英雄: " + heroName);
     }
 
-    // 计算插入索引
-    private static int calculateInsertIndex(double mouseX, double mouseY) {
+    /**
+     * 创建拖拽预览卡片
+     * 
+     * @param heroName 英雄名称
+     * @return 预览卡片 VBox 组件
+     */
+    private static VBox createDragPreview(String heroName) {
+        VBox preview = createHeroCardBase(heroName, null);
+        preview.setStyle("-fx-border-color: #4FA6FD; -fx-border-width: 2px;");
+        preview.setOpacity(0.85);
+        preview.setMouseTransparent(true);
+        preview.setManaged(false);
+        return preview;
+    }
+
+    /**
+     * 更新拖拽预览卡片的位置
+     * 
+     * @param mouseX 鼠标 X 坐标（相对于 ScrollPane）
+     * @param mouseY 鼠标 Y 坐标（相对于 ScrollPane）
+     */
+    private static void updateDragPreviewPosition(double mouseX, double mouseY) {
+        if (dragPreview != null) {
+            Bounds stackBounds = priorityStack.getBoundsInLocal();
+            double scrollOffset = rightScrollPane.getVvalue() * (priorityFlowPane.getHeight() - stackBounds.getHeight());
+
+            double previewX = mouseX - HERO_CARD_SIZE / 2;
+            double previewY = mouseY - AVATAR_SIZE / 2 + scrollOffset;
+
+            dragPreview.setLayoutX(previewX);
+            dragPreview.setLayoutY(previewY);
+            
+            System.out.println("[拖拽预览] 位置更新 - X: " + previewX + ", Y: " + previewY);
+        }
+    }
+
+    /**
+     * 更新插入位置指示线
+     * 
+     * @param mouseX 鼠标 X 坐标（相对于 ScrollPane）
+     * @param mouseY 鼠标 Y 坐标（相对于 ScrollPane）
+     */
+    private static void updateInsertPosition(double mouseX, double mouseY) {
+        Bounds viewportBounds = rightScrollPane.getBoundsInLocal();
+        double scrollOffset = rightScrollPane.getVvalue() * (priorityFlowPane.getHeight() - viewportBounds.getHeight());
+
+        double flowY = mouseY + scrollOffset;
+
+        int newInsertIndex = calculateInsertIndex(mouseX, flowY);
+        if (newInsertIndex != insertIndex) {
+            insertIndex = newInsertIndex;
+            updateInsertLinePosition(newInsertIndex);
+            System.out.println("[插入位置] 更新 - 索引: " + insertIndex);
+        }
+    }
+
+    /**
+     * 处理自动滚动
+     * 
+     * 当鼠标靠近 ScrollPane 边缘时自动滚动
+     * 
+     * @param mouseY 鼠标 Y 坐标（相对于 ScrollPane）
+     */
+    private static void handleAutoScroll(double mouseY) {
+        Bounds viewportBounds = rightScrollPane.getBoundsInLocal();
+        double viewportHeight = viewportBounds.getHeight();
+        double scrollZone = 40;
+
+        if (mouseY < scrollZone) {
+            double newValue = rightScrollPane.getVvalue() - 0.02;
+            rightScrollPane.setVvalue(Math.max(0, newValue));
+            System.out.println("[自动滚动] 向上滚动 - vvalue: " + rightScrollPane.getVvalue());
+        } else if (mouseY > viewportHeight - scrollZone) {
+            double newValue = rightScrollPane.getVvalue() + 0.02;
+            rightScrollPane.setVvalue(Math.min(1, newValue));
+            System.out.println("[自动滚动] 向下滚动 - vvalue: " + rightScrollPane.getVvalue());
+        }
+    }
+
+    /**
+     * 完成拖拽模式
+     * 
+     * 功能：
+     * 1. 执行列表重排序
+     * 2. 恢复原卡片透明度
+     * 3. 移除拖拽预览卡片
+     * 4. 重置所有状态变量
+     */
+    private static void finishDragMode() {
+        // 执行重排序
+        if (draggedHeroName != null && insertIndex >= 0) {
+            int draggedIndex = priorityHeroes.indexOf(draggedHeroName);
+            if (draggedIndex != -1) {
+                int targetIdx = insertIndex;
+                if (draggedIndex < targetIdx) {
+                    targetIdx--;
+                }
+                if (draggedIndex != targetIdx && targetIdx >= 0 && targetIdx <= priorityHeroes.size()) {
+                    System.out.println("[拖拽完成] 重排序 - 从 " + draggedIndex + " 移动到 " + targetIdx);
+                    priorityHeroes.remove(draggedIndex);
+                    priorityHeroes.add(targetIdx, draggedHeroName);
+                    refreshPriorityFlowPane();
+                } else {
+                    System.out.println("[拖拽完成] 位置未变化 - draggedIndex: " + draggedIndex + ", targetIdx: " + targetIdx);
+                }
+            }
+        }
+
+        // 恢复原卡片透明度
+        if (draggedCard != null) {
+            draggedCard.setOpacity(1.0);
+        }
+        
+        // 移除拖拽预览卡片
+        if (dragPreview != null) {
+            priorityStack.getChildren().remove(dragPreview);
+        }
+
+        // 重置状态
+        insertLine.setVisible(false);
+        insertIndex = -1;
+        isDragging = false;
+        draggedHeroName = null;
+        draggedCard = null;
+        dragPreview = null;
+        
+        System.out.println("[拖拽模式] 已退出");
+    }
+
+    // ==================== 计算方法 ====================
+
+    /**
+     * 计算插入位置索引
+     * 
+     * 根据鼠标坐标判断应该插入到哪个位置
+     * 
+     * @param mouseX 鼠标 X 坐标（相对于 FlowPane）
+     * @param flowY 鼠标 Y 坐标（已加上滚动偏移）
+     * @return 插入位置索引
+     */
+    private static int calculateInsertIndex(double mouseX, double flowY) {
         List<javafx.scene.Node> children = priorityFlowPane.getChildren();
         int size = children.size();
 
@@ -604,46 +894,37 @@ public class HeroPriorityConfigWindow {
             return 0;
         }
 
-        // 先检查是否在第一个卡片之前
-        if (!children.isEmpty()) {
-            Bounds firstBounds = children.get(0).getBoundsInParent();
-            if (mouseX < firstBounds.getMinX() + firstBounds.getWidth() / 2 &&
-                mouseY < firstBounds.getMaxY()) {
-                return 0;
-            }
-        }
-
-        // 检查每个卡片的中间位置
+        // 遍历所有卡片，判断鼠标在哪个卡片的范围内
         for (int i = 0; i < size; i++) {
             javafx.scene.Node node = children.get(i);
             Bounds bounds = node.getBoundsInParent();
 
-            // 检查是否在这个卡片的左半部分
-            if (mouseX >= bounds.getMinX() && mouseX <= bounds.getMinX() + bounds.getWidth() / 2 &&
-                mouseY >= bounds.getMinY() && mouseY <= bounds.getMaxY()) {
-                return i;
-            }
-
-            // 检查是否在这个卡片的右半部分
-            if (mouseX > bounds.getMinX() + bounds.getWidth() / 2 && mouseX <= bounds.getMaxX() &&
-                mouseY >= bounds.getMinY() && mouseY <= bounds.getMaxY()) {
-                return i + 1;
+            // 检查鼠标是否在这一行
+            if (flowY >= bounds.getMinY() && flowY <= bounds.getMaxY()) {
+                // 检查鼠标在卡片的左半部分还是右半部分
+                if (mouseX <= bounds.getMinX() + bounds.getWidth() / 2) {
+                    return i;       // 左半部分：插入到该卡片前面
+                }
+                if (mouseX <= bounds.getMaxX()) {
+                    return i + 1;   // 右半部分：插入到该卡片后面
+                }
             }
         }
 
-        // 检查是否在最后一行的末尾
-        if (!children.isEmpty()) {
-            Bounds lastBounds = children.get(size - 1).getBoundsInParent();
-            if (mouseX > lastBounds.getMinX() + lastBounds.getWidth() / 2 ||
-                mouseY > lastBounds.getMaxY()) {
-                return size;
-            }
+        // 检查是否在最后一行下方
+        Bounds lastBounds = children.get(size - 1).getBoundsInParent();
+        if (flowY > lastBounds.getMaxY()) {
+            return size;
         }
 
         return size;
     }
 
-    // 更新插入线位置
+    /**
+     * 更新插入位置指示线的位置
+     * 
+     * @param index 插入位置索引
+     */
     private static void updateInsertLinePosition(int index) {
         List<javafx.scene.Node> children = priorityFlowPane.getChildren();
         int size = children.size();
@@ -655,12 +936,10 @@ public class HeroPriorityConfigWindow {
             insertLine.setHeight(100);
         } else if (index >= size) {
             // 插入到最后面
-            if (!children.isEmpty()) {
-                Bounds lastBounds = children.get(size - 1).getBoundsInParent();
-                insertLine.setLayoutX(lastBounds.getMaxX() + CARD_GAP / 2 - 2);
-                insertLine.setLayoutY(lastBounds.getMinY());
-                insertLine.setHeight(lastBounds.getHeight());
-            }
+            Bounds lastBounds = children.get(size - 1).getBoundsInParent();
+            insertLine.setLayoutX(lastBounds.getMaxX() + CARD_GAP / 2 - 2);
+            insertLine.setLayoutY(lastBounds.getMinY());
+            insertLine.setHeight(lastBounds.getHeight());
         } else {
             // 插入到中间
             Bounds targetBounds = children.get(index).getBoundsInParent();
@@ -670,5 +949,34 @@ public class HeroPriorityConfigWindow {
         }
 
         insertLine.setVisible(true);
+    }
+
+    // ==================== 移动方法 ====================
+
+    /**
+     * 将英雄从左侧移动到右侧优先级列表
+     * 
+     * @param heroName 英雄名称
+     */
+    private static void moveToPriority(String heroName) {
+        availableHeroes.remove(heroName);
+        priorityHeroes.add(heroName);
+        refreshPriorityFlowPane();
+        refreshAvailableFlowPaneByFilter();
+    }
+
+    /**
+     * 将英雄从右侧优先级列表移动回左侧
+     * 
+     * @param heroName 英雄名称
+     */
+    private static void moveToAvailable(String heroName) {
+        priorityHeroes.remove(heroName);
+        if (!availableHeroes.contains(heroName)) {
+            availableHeroes.add(heroName);
+            FXCollections.sort(availableHeroes);
+        }
+        refreshPriorityFlowPane();
+        refreshAvailableFlowPaneByFilter();
     }
 }
