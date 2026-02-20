@@ -70,10 +70,10 @@ public class HeroPriorityConfigWindow {
         }
 
         .column-header {
-            -fx-font-size: 14px;
+            -fx-font-size: 13px;
             -fx-font-weight: 500;
             -fx-text-fill: #939292;
-            -fx-padding: 6px 0 10px 0;
+            -fx-padding: 2px 0 6px 0;
         }
 
         .panel {
@@ -82,7 +82,7 @@ public class HeroPriorityConfigWindow {
             -fx-border-radius: 6px;
             -fx-border-color: transparent;
             -fx-border-width: 0;
-            -fx-padding: 14px;
+            -fx-padding: 10px;
         }
 
         .text-field {
@@ -94,7 +94,7 @@ public class HeroPriorityConfigWindow {
             -fx-border-radius: 6px;
             -fx-background-radius: 6px;
             -fx-font-size: 13px;
-            -fx-padding: 8px 12px;
+            -fx-padding: 7px 10px;
             -fx-highlight-fill: #00CC74;
             -fx-cursor: text;
         }
@@ -104,7 +104,7 @@ public class HeroPriorityConfigWindow {
 
         .hero-grid {
             -fx-background-color: transparent;
-            -fx-padding: 6px;
+            -fx-padding: 0;
         }
 
         .hero-card {
@@ -152,7 +152,7 @@ public class HeroPriorityConfigWindow {
         }
         .scroll-pane .scroll-bar:vertical {
             -fx-background-color: transparent;
-            -fx-padding: 0 0 0 4px;
+            -fx-padding: 0 0 0 2px;
         }
         .scroll-pane .scroll-bar:vertical .track {
             -fx-background-color: transparent;
@@ -178,14 +178,14 @@ public class HeroPriorityConfigWindow {
         .button {
             -fx-background-color: #282B3D;
             -fx-text-fill: #FFFFFF;
-            -fx-font-size: 13px;
+            -fx-font-size: 12px;
             -fx-font-weight: 500;
             -fx-border-color: #3E4257;
             -fx-border-width: 1px;
             -fx-background-radius: 6px;
             -fx-border-radius: 6px;
             -fx-cursor: hand;
-            -fx-padding: 8px 16px;
+            -fx-padding: 6px 12px;
         }
         .button:hover {
             -fx-background-color: #3E4257;
@@ -285,7 +285,7 @@ public class HeroPriorityConfigWindow {
         titleUnderline.getStyleClass().add("title-underline");
         VBox titleContainer = new VBox(6, titleLabel, titleUnderline);
         titleContainer.setAlignment(Pos.CENTER);
-        titleContainer.setPadding(new Insets(18, 0, 12, 0));
+        titleContainer.setPadding(new Insets(12, 0, 8, 0));
 
         // 构建左侧面板（可用英雄列表）
         Label leftHeaderLabel = new Label("全部英雄");
@@ -298,7 +298,7 @@ public class HeroPriorityConfigWindow {
         availableFlowPane = new FlowPane();
         availableFlowPane.setHgap(CARD_GAP);
         availableFlowPane.setVgap(CARD_GAP);
-        availableFlowPane.setPadding(new Insets(6, 0, 6, 0));
+        availableFlowPane.setPadding(new Insets(4, 4, 4, 4));
         availableFlowPane.getStyleClass().add("hero-grid");
         refreshAvailableFlowPane(availableHeroes);
 
@@ -307,9 +307,9 @@ public class HeroPriorityConfigWindow {
         leftScrollPane.setFitToWidth(true);
         leftScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         leftScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        leftScrollPane.setPrefViewportHeight(400);
+        leftScrollPane.setPrefViewportHeight(420);
 
-        VBox leftPanel = new VBox(10, leftHeaderLabel, searchField, leftScrollPane);
+        VBox leftPanel = new VBox(8, leftHeaderLabel, searchField, leftScrollPane);
         leftPanel.getStyleClass().add("panel");
         VBox.setVgrow(leftScrollPane, Priority.ALWAYS);
         leftPanel.setDisable(!allChampionsAvailable);
@@ -323,16 +323,15 @@ public class HeroPriorityConfigWindow {
         });
 
         // 构建右侧面板（优先级列表）
-        Label rightHeaderLabel = new Label("优先级列表 (拖动排序)");
+        Label rightHeaderLabel = new Label("优先级列表");
         rightHeaderLabel.getStyleClass().add("column-header");
 
         Button clearButton = new Button("清空已选");
         clearButton.getStyleClass().addAll("button", "button-danger");
+        clearButton.setPadding(new Insets(6, 12, 6, 12));
 
-        HBox rightHeader = new HBox();
+        HBox rightHeader = new HBox(8, rightHeaderLabel, clearButton);
         rightHeader.setAlignment(Pos.CENTER_LEFT);
-        rightHeader.getChildren().addAll(rightHeaderLabel, new Region(), clearButton);
-        HBox.setHgrow(rightHeaderLabel, Priority.ALWAYS);
 
         // 创建优先级面板容器
         priorityStack = new StackPane();
@@ -341,7 +340,7 @@ public class HeroPriorityConfigWindow {
         priorityFlowPane = new FlowPane();
         priorityFlowPane.setHgap(CARD_GAP);
         priorityFlowPane.setVgap(CARD_GAP);
-        priorityFlowPane.setPadding(new Insets(6, 0, 6, 0));
+        priorityFlowPane.setPadding(new Insets(4, 4, 4, 4));
         priorityFlowPane.getStyleClass().add("hero-grid");
 
         // 创建插入位置指示线
@@ -390,21 +389,21 @@ public class HeroPriorityConfigWindow {
         Button cancelButton = new Button("取消");
         cancelButton.getStyleClass().add("button");
 
-        HBox bottomBox = new HBox(12, saveButton, cancelButton);
+        HBox bottomBox = new HBox(10, saveButton, cancelButton);
         bottomBox.setAlignment(Pos.CENTER);
-        bottomBox.setPadding(new Insets(16, 0, 8, 0));
+        bottomBox.setPadding(new Insets(10, 0, 6, 0));
 
         // 构建根布局
         BorderPane rootLayout = new BorderPane();
         rootLayout.setTop(titleContainer);
         rootLayout.setCenter(mainContent);
         rootLayout.setBottom(bottomBox);
-        rootLayout.setPadding(new Insets(0, 20, 16, 20));
+        rootLayout.setPadding(new Insets(0, 16, 12, 16));
         rootLayout.getStyleClass().add("root");
         rootLayout.setEffect(new DropShadow(30, Color.BLACK));
 
         // 创建场景
-        Scene scene = new Scene(rootLayout, 780, 580);
+        Scene scene = new Scene(rootLayout, 760, 560);
         scene.setFill(Color.TRANSPARENT);
         try {
             String encodedCSS = URLEncoder.encode(CSS_STYLE, StandardCharsets.UTF_8).replace("+", "%20");
