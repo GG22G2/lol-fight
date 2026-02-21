@@ -219,6 +219,7 @@ public class HeroPriorityConfigWindow {
 
     // 拖拽状态系
     private boolean isDragging = false;
+    private boolean isAnimatingDrop = false; // 防并发锁：防止动画吸附期间点击引发错位
     private String draggedHeroName = null;
     private VBox draggedSourceCard = null; // 原位隐身的卡片
     private VBox dragPreview = null;       // 悬浮层飞行的卡片
@@ -376,6 +377,7 @@ public class HeroPriorityConfigWindow {
         Button clearBtn = new Button("清空队列");
         clearBtn.getStyleClass().addAll("btn-modern", "btn-danger");
         clearBtn.setOnAction(e -> {
+            if (isAnimatingDrop) return;
             availableHeroes.addAll(priorityHeroes);
             priorityHeroes.clear();
             FXCollections.sort(availableHeroes);
@@ -398,7 +400,11 @@ public class HeroPriorityConfigWindow {
 
         // 监听宽度变化重新计算排版
         rightScrollPane.viewportBoundsProperty().addListener((obs, oldV, newV) -> {
-            if (!isDragging) layoutPriorityCards(false, -1);
+            if (!isDragging && !isAnimatingDrop) {
+                layoutPriorityCards(false, -1);
+            } else {
+                layoutPriorityCards(false, currentPlaceholderIndex);
+            }
         });
 
         VBox panel = new VBox(14, headerBox, rightScrollPane);
@@ -437,6 +443,7 @@ public class HeroPriorityConfigWindow {
             // 左侧依然保留正常的点击事件
             card.setOnMouseClicked(e -> {
                 if (e.getButton() == MouseButton.PRIMARY) {
+                    if (isAnimatingDrop) return;
                     moveToPriority(hero);
                 }
             });
@@ -450,6 +457,12 @@ public class HeroPriorityConfigWindow {
     }
 
     private void refreshPriorityPane() {
+        refreshPriorityPane(true);
+    }
+
+    // 重载方法：如果 animate=false，则会保留原本的元素位置直接覆盖，避免全体复位闪烁
+    private void refreshPriorityPane(boolean animate) {
+        List<VBox> oldCards = new ArrayList<>(activePriorityCards);
         priorityPane.getChildren().clear();
         activePriorityCards.clear();
 
@@ -458,6 +471,15 @@ public class HeroPriorityConfigWindow {
             VBox card = createCard(hero, i + 1);
             card.setUserData(hero);
 
+            // 继承原有卡片坐标，避免重新渲染时判定为新加入的 (0,0) 而触发全局 fade-in 闪烁
+            for (VBox oldCard : oldCards) {
+                if (hero.equals(oldCard.getUserData())) {
+                    card.setTranslateX(oldCard.getTranslateX());
+                    card.setTranslateY(oldCard.getTranslateY());
+                    break;
+                }
+            }
+
             // 右侧卡片不再使用 setOnMouseClicked，避免与拖拽拦截起冲突
             // 右侧移除逻辑统一在右侧 ScrollPane 的 MouseReleased Filter 中处理
 
@@ -465,7 +487,7 @@ public class HeroPriorityConfigWindow {
             activePriorityCards.add(card);
         }
         // 带动画地将卡片排好位置
-        layoutPriorityCards(true, -1);
+        layoutPriorityCards(animate, -1);
     }
 
     private void moveToPriority(String heroName) {
@@ -554,7 +576,7 @@ public class HeroPriorityConfigWindow {
     private void setupDragEvents(Node node) {
         // 使用 EventFilter 提前拦截，防止 ScrollPane 吞噬我们的拖拽事件
         node.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
-            if (e.getButton() != MouseButton.PRIMARY) return;
+            if (e.getButton() != MouseButton.PRIMARY || isAnimatingDrop) return;
 
             VBox targetCard = getCardFromEvent(e);
             if (targetCard == null) return;
@@ -606,15 +628,18 @@ public class HeroPriorityConfigWindow {
                 if (draggedHeroName != null) {
                     moveToAvailable(draggedHeroName);
                 }
+
+                isDragging = false;
+                draggedSourceCard = null;
+                draggedHeroName = null;
                 e.consume(); // 拦截点击
             } else if (isDragging) {
                 finishDrag();
+                isDragging = false;
+                // 注意：这里不再清空 draggedSourceCard 变量，交由 finishDrag 在动画完毕后清理
+                // 防止在 drop 动画 200 毫秒内引起 UI 状态断层报错！
                 e.consume(); // 拦截释放
             }
-
-            isDragging = false;
-            draggedSourceCard = null;
-            draggedHeroName = null;
         });
     }
 
@@ -688,43 +713,63 @@ public class HeroPriorityConfigWindow {
     }
 
     private void finishDrag() {
-        if (dragPreview == null || currentPlaceholderIndex == -1) return;
+        if (dragPreview == null || currentPlaceholderIndex == -1) {
+            dragPreview = null;
+            draggedSourceCard = null;
+            draggedHeroName = null;
+            currentPlaceholderIndex = -1;
+            return;
+        }
+
+        isAnimatingDrop = true; // 加防并发锁
+
+        // 捕获局部变量，防止它们被鼠标释放等外部事件中途破坏
+        Node preview = dragPreview;
+        int targetIndex = currentPlaceholderIndex;
+        String heroName = draggedHeroName;
 
         // 计算目标坑位在 priorityPane 内部的绝对坐标
         double width = rightScrollPane.getViewportBounds().getWidth();
+        if(width <= 0) width = 400; // 防御
         int cols = Math.max(1, (int)((width - GRID_GAP) / (CARD_W + GRID_GAP)));
-        double targetLocalX = GRID_GAP + (currentPlaceholderIndex % cols) * (CARD_W + GRID_GAP);
-        double targetLocalY = GRID_GAP + (currentPlaceholderIndex / cols) * (CARD_H + GRID_GAP);
+        double targetLocalX = GRID_GAP + (targetIndex % cols) * (CARD_W + GRID_GAP);
+        double targetLocalY = GRID_GAP + (targetIndex / cols) * (CARD_H + GRID_GAP);
 
         // 转换为顶层 Scene 的全局坐标以供飞行卡片对齐
         Point2D targetScene = priorityPane.localToScene(targetLocalX, targetLocalY);
 
         // 创建精准坠落/吸附动画
-        TranslateTransition fall = new TranslateTransition(Duration.millis(200), dragPreview);
-        fall.setToX(targetScene.getX() - dragPreview.getLayoutX());
-        fall.setToY(targetScene.getY() - dragPreview.getLayoutY());
+        TranslateTransition fall = new TranslateTransition(Duration.millis(200), preview);
+        fall.setToX(targetScene.getX() - preview.getLayoutX());
+        fall.setToY(targetScene.getY() - preview.getLayoutY());
 
-        RotateTransition rotate = new RotateTransition(Duration.millis(200), dragPreview);
+        RotateTransition rotate = new RotateTransition(Duration.millis(200), preview);
         rotate.setToAngle(0);
 
-        ScaleTransition scale = new ScaleTransition(Duration.millis(200), dragPreview);
+        ScaleTransition scale = new ScaleTransition(Duration.millis(200), preview);
         scale.setToX(1.0);
         scale.setToY(1.0);
 
         ParallelTransition pt = new ParallelTransition(fall, rotate, scale);
         pt.setOnFinished(ev -> {
             // 动画结束后清理临时节点并刷新真实数据
-            overlayPane.getChildren().remove(dragPreview);
-            dragPreview = null;
+            overlayPane.getChildren().remove(preview);
 
-            int oldIndex = priorityHeroes.indexOf(draggedHeroName);
-            if (oldIndex != -1 && oldIndex != currentPlaceholderIndex) {
+            int oldIndex = priorityHeroes.indexOf(heroName);
+            if (oldIndex != -1 && oldIndex != targetIndex) {
                 priorityHeroes.remove(oldIndex);
-                priorityHeroes.add(currentPlaceholderIndex, draggedHeroName);
+                priorityHeroes.add(targetIndex, heroName);
             }
 
+            // 传入 false，代表重排时完全摒弃 FadeIn 微动画闪烁，让数据顺滑瞬间交接
+            refreshPriorityPane(false);
+
+            // 彻底清理状态
+            dragPreview = null;
+            draggedSourceCard = null;
+            draggedHeroName = null;
             currentPlaceholderIndex = -1;
-            refreshPriorityPane();
+            isAnimatingDrop = false; // 释放锁
         });
         pt.play();
     }
