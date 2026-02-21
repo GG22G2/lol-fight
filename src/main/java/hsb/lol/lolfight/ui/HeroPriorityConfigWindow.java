@@ -24,6 +24,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.application.Platform;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -286,7 +287,7 @@ public class HeroPriorityConfigWindow {
         } catch (Exception ignored) {}
 
         window.setScene(scene);
-        window.showAndWait();
+        Platform.runLater(window::showAndWait);
     }
 
     private void initData() {
