@@ -4,91 +4,93 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 
 /**
- * @author hsb
- * @date 2023/8/27 0:53
+ * RootPanel - Cyber Hex Style
+ * 赛博海克斯风格自定义窗口标题栏
  */
 public class RootPanel extends BorderPane {
 
     public RootPanel(Stage stage) {
         super();
         initHeader(stage);
-
+        getStyleClass().add("main-glass-bg");
     }
 
-
-    public void setRootBackgroundTransparent(boolean transparent){
-        if (transparent){
+    public void setRootBackgroundTransparent(boolean transparent) {
+        if (transparent) {
             setStyle("-fx-background-color: rgba(0, 0, 0, 0);");
-        }else {
-            setStyle("-fx-background-color: rgba(255, 255, 255, 255);");
+        } else {
+            setStyle("-fx-background-color: transparent;");
         }
     }
 
-    public void initHeader(Stage stage) {
-        VBox header = new VBox();
-        header.prefHeight(26);
-        header.setAlignment(Pos.TOP_CENTER);
-        header.setStyle("-fx-background-color: #282B3D;");
+    private void initHeader(Stage stage) {
+        HBox header = new HBox();
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.getStyleClass().add("main-header");
+        header.setPadding(new Insets(10, 8, 8, 12));
 
+        // 应用标题 - LOL·FIGHT
+        Label titleLabel = new Label("LOL·FIGHT");
+        titleLabel.getStyleClass().add("app-title");
+        DropShadow titleGlow = new DropShadow(12, Color.rgb(0, 240, 255, 0.4));
+        titleGlow.setOffsetY(0);
+        titleLabel.setEffect(titleGlow);
 
-        HBox fillWithBox = new HBox();
-        fillWithBox.prefHeight(0);
-        HBox.setHgrow(fillWithBox, Priority.ALWAYS);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        // 最小化按钮
+        StackPane miniBtn = createWindowControlButton(
+            "M 4 10 L 12 10",
+            "#788299",
+            "#FFFFFF"
+        );
+        miniBtn.setOnMouseClicked(e -> stage.setIconified(true));
 
-        HBox optBtnBox = new HBox(4);
-        optBtnBox.prefHeight(26);
-        optBtnBox.setAlignment(Pos.CENTER_RIGHT);
-        optBtnBox.setPadding(new Insets(0,1,0,0));
-
-
-
-        StackPane miniBtn = createButton("mini-btn","svg-btn");
-        miniBtn.setOnMouseClicked(mouseEvent -> {
-            stage.setIconified(true);
-        });
-
-
-        StackPane closeBtn = createButton("close-btn","svg-btn");
-        closeBtn.setOnMouseClicked(mouseEvent -> {
-           stage.hide();
+        // 关闭按钮
+        StackPane closeBtn = createWindowControlButton(
+            "M 4 4 L 12 12 M 12 4 L 4 12",
+            "#788299",
+            "#FF4565"
+        );
+        closeBtn.getStyleClass().add("close");
+        closeBtn.setOnMouseClicked(e -> {
+            stage.hide();
             Platform.exit();
             System.exit(0);
         });
-        optBtnBox.getChildren().addAll(miniBtn,closeBtn);
-        header.getChildren().addAll(fillWithBox,optBtnBox);
+
+        header.getChildren().addAll(titleLabel, spacer, miniBtn, closeBtn);
         setTop(header);
     }
 
-
-    public void setRoot(Node root){
+    public void setRoot(Node root) {
         setCenter(root);
     }
 
+    private StackPane createWindowControlButton(String svgPath, String normalColor, String hoverColor) {
+        SVGPath icon = new SVGPath();
+        icon.setContent(svgPath);
+        icon.setStroke(Color.web(normalColor));
+        icon.setStrokeWidth(1.5);
+        icon.setFill(null);
 
-    public StackPane createButton(String id,String styleClass) {
-        StackPane stackPane = new StackPane();
-        stackPane.setId(id);
-        stackPane.setMaxHeight(Double.NEGATIVE_INFINITY);
-        stackPane.setMaxWidth(Double.NEGATIVE_INFINITY);
-        stackPane.setPrefHeight(26);
-        stackPane.setPrefWidth(40);
+        StackPane btn = new StackPane(icon);
+        btn.getStyleClass().add("window-control-btn");
+        btn.setPrefSize(28, 24);
+        btn.setMinSize(28, 24);
 
-        stackPane.getStyleClass().add(styleClass);
+        btn.setOnMouseEntered(e -> icon.setStroke(Color.web(hoverColor)));
+        btn.setOnMouseExited(e -> icon.setStroke(Color.web(normalColor)));
 
-        Region region = new Region();
-        region.setMaxHeight(Double.NEGATIVE_INFINITY);
-        region.setMaxWidth(Double.NEGATIVE_INFINITY);
-        region.setPrefHeight(26);
-        region.setPrefWidth(40);
-        stackPane.getChildren().add(region);
-
-        return stackPane;
+        return btn;
     }
-
-
 }
