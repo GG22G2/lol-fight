@@ -86,21 +86,33 @@
     -fx-pref-height: 10px;
     -fx-max-width: 10px;
     -fx-max-height: 10px;
-    -fx-background-color: #ffffff;
+    -fx-background-color: #a0a0a0;
 }
 
 .svg-btn:hover {
-    -fx-background-color: #adadb6;
+    -fx-background-color: #3E4257;
 }
 
-/*.svg-btn:hover Region {*/
-/*    -fx-background-color: #C9C9CE;*/
-/*}*/
+.svg-btn:pressed {
+    -fx-background-color: #2d3040;
+}
+
+.svg-btn:hover Region {
+    -fx-background-color: #ffffff;
+}
 
 .svg-btn:pressed Region {
-    -fx-background-color: black;
+    -fx-background-color: #cccccc;
 }
 
+
+#mini-btn {
+    -fx-background-color: transparent;
+}
+
+#mini-btn:hover {
+    -fx-background-color: #3E4257;
+}
 
 #mini-btn Region {
     -fx-max-height: 1px;
@@ -111,9 +123,35 @@
     -fx-shape: "M768 170.666667H256c-46.933333 0-85.333333 38.4-85.333333 85.333333v512c0 46.933333 38.4 85.333333 85.333333 85.333333h512c46.933333 0 85.333333-38.4 85.333333-85.333333V256c0-46.933333-38.4-85.333333-85.333333-85.333333zM256 768V256h512v512H256z";
 }
 
+#close-btn {
+    -fx-background-color: transparent;
+}
+
+#close-btn:hover {
+    -fx-background-color: #e81123;
+}
+
+#close-btn:pressed {
+    -fx-background-color: #b70d1b;
+}
+
 #close-btn Region {
-    /*-fx-background-color: gray;*/
     -fx-shape: "M31.5,29.3L18.3,16.1L31.5,2.9c0.6-0.6,0.6-1.7,0-2.3c-0.6-0.6-1.7-0.6-2.3,0L16,13.8L2.8,0.5c-0.6-0.6-1.7-0.6-2.3,0  s-0.6,1.7,0,2.3l13.2,13.2L0.5,29.3c-0.6,0.6-0.6,1.7,0,2.3c0.6,0.6,1.7,0.6,2.3,0L16,18.4l13.2,13.2c0.6,0.6,1.7,0.6,2.3,0  C32.2,31,32.2,29.9,31.5,29.3L31.5,29.3z";
+}
+
+/* 配置按钮样式 */
+.config-btn {
+    -fx-background-color: #3E4257;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.config-btn:hover {
+    -fx-background-color: #4a4f66;
+}
+
+.config-btn:pressed {
+    -fx-background-color: #2d3040;
 }
 
 .host-item{

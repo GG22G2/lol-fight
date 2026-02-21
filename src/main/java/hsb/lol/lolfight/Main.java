@@ -71,10 +71,10 @@ public class Main extends Application {
         Label configChampionBtn = new Label("配置");
         configChampionBtn.setTextFill(Paint.valueOf("#ffffff"));
         HBox.setMargin(configChampionBtn, new Insets(0, 0, 0, 10));
-        configChampionBtn.setPadding(new Insets(3, 5, 3, 5));
-        configChampionBtn.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));
+        configChampionBtn.setPadding(new Insets(4, 10, 4, 10));
+        configChampionBtn.getStyleClass().add("config-btn");
         configChampionBtn.setOnMouseClicked(event -> {
-            // 当点击“配置”时，调用显示配置窗口的方法
+            // 当点击"配置"时，调用显示配置窗口的方法
             HeroPriorityConfigWindow.display();
         });
 
